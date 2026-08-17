@@ -47,3 +47,19 @@
 {"t":1786983788047,"type":"remove","id":"li-helvetica"}
 {"t":1786983789782,"type":"remove","id":"li-hoefler"}
 {"t":1786983791845,"type":"move","id":"li-charter","parentId":"faces","beforeId":"li-source"}
+{"t":1786984261343,"type":"setAttr","id":"sheet","name":"data-font","value":"hoefler"}
+{"t":1786984315619,"type":"remove","id":"li-optima"}
+{"t":1786984316351,"type":"insert","html":"<li data-marble-id=\"li-optima\" data-marble-removable><button type=\"button\" data-marble-id=\"f-optima\" data-face=\"optima\" aria-pressed=\"false\"><span class=\"fname\" data-marble-id=\"fn-optima\">Optima</span><span class=\"fnote\" data-marble-id=\"fd-optima\">Modulated sans</span></button></li>","parentId":"faces","beforeId":"li-helvetica"}
+{"t":1786984319296,"type":"setAttr","id":"sheet","name":"data-font","value":"avenir"}
+{"t":1786984360204,"type":"setAttr","id":"blk-ski","name":"hidden","value":""}
+{"t":1786984361555,"type":"setAttr","id":"blk-ski","name":"hidden","value":null}
+{"t":1786984382863,"type":"setAttr","id":"blk-ski","name":"hidden","value":""}
+{"t":1786984383875,"type":"setAttr","id":"blk-ski","name":"hidden","value":null}
+{"t":1786984470275,"type":"setAttr","id":"blk-ser","name":"hidden","value":""}
+{"t":1786984471825,"type":"setAttr","id":"blk-ser","name":"hidden","value":null}
+{"t":1786984944399,"type":"setAttr","id":"blk-ski","name":"hidden","value":""}
+{"t":1786984946637,"type":"setAttr","id":"blk-ski","name":"hidden","value":null}
+{"t":1786984964012,"type":"remove","id":"li-avenir"}
+{"t":1786984964785,"type":"remove","id":"li-optima"}
+{"t":1786984965487,"type":"remove","id":"li-helvetica"}
+{"t":1786984966283,"type":"remove","id":"li-hoefler"}

@@ -21,6 +21,22 @@
     --indent: 0.28in;
     --gap: 0.12in;
     --rail: 13.5rem;
+
+    /* Hover, as a system rather than a value picked per control.
+       Everything interactive settles through the same tint at the same speed,
+       and the tints are deliberately shallow — a rail beside a document should
+       answer the pointer, not compete with the page for attention. Leaving is
+       slower than arriving, which is what makes it read as settling rather
+       than blinking. */
+    --tint-1: rgba(17, 17, 20, .04);   /* hover */
+    --tint-2: rgba(17, 17, 20, .07);   /* held, or chosen */
+    --edge:   rgba(17, 17, 20, .10);
+    --ink-1:  rgba(17, 17, 20, .58);   /* resting label */
+    --ink-2:  rgba(17, 17, 20, .78);   /* hovered */
+    --ink-3:  rgba(17, 17, 20, .92);   /* chosen */
+    --ease: cubic-bezier(.32, .72, 0, 1);
+    --in: .13s;
+    --out: .22s;
     /* Where margin furniture starts. The drag handle is the anchor, so a
        grip and a + button share a left edge and the margin reads as one
        column. */
@@ -211,8 +227,6 @@
   .rail .marble-grip {
     left: auto;
     right: .25rem;
-    background: rgba(251, 251, 252, .92);
-    border-radius: 5px;
   }
   /* The rail's own groups reorder too, so Export can sit above Typeface. Its
      grip rides at the top, level with the group's label. */
@@ -221,11 +235,13 @@
 
   .faces { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
   .faces > li > .marble-grip { top: 50%; transform: translateY(-50%); }
-  /* On the chosen swatch the plate would be a white block on black, so it
-     drops out and the icons invert instead. The grip is prepended, so it is
-     never the button's next sibling — this has to ask the row, not the button. */
-  .faces .marble-item:has(.marble-on) > .marble-grip { background: none; }
-  .faces .marble-item:has(.marble-on) .marble-btn { color: #fff; }
+  /* The swatch's own tint already reads as "this row is live", so the knobs sit
+     straight on it. They used to carry an opaque plate, which was only ever
+     there to survive the black chosen-state and showed up as a pale rectangle
+     floating inside the row once that went away. */
+  .faces .marble-btn { opacity: .5; }
+  .faces li:hover .marble-btn { opacity: .85; }
+  .faces .marble-btn:hover { opacity: 1; }
   .faces button {
     display: block;
     width: 100%;
@@ -233,11 +249,19 @@
     border: 1px solid transparent;
     border-radius: 6px;
     background: none;
-    color: #111;
+    color: var(--ink-2);
     text-align: left;
     cursor: pointer;
+    transition:
+      background-color var(--out) var(--ease),
+      border-color var(--out) var(--ease),
+      color var(--out) var(--ease);
   }
-  .faces button:hover { background: rgba(0, 0, 0, .05); }
+  .faces button:hover {
+    background: var(--tint-1);
+    color: var(--ink-3);
+    transition-duration: var(--in);
+  }
   .faces button:focus-visible { outline: 2px solid #5b8def; outline-offset: -1px; }
   /* The swatch is set in the face it is offering — that is the preview. */
   .faces .fname { display: block; font-size: 14px; line-height: 1.25; }
@@ -259,15 +283,18 @@
      equals the sheet's attribute", and a selector cannot ask that. So a script
      derives it into a marble- class, and a static default covers the case where
      there is no host to derive anything. */
+  /* Chosen is a settled tint and a visible edge, not a black plate. Reversing
+     to white-on-black made the one thing you had already decided shout louder
+     than the six you had not. */
   .faces .marble-on,
   .faces:not(.marble-derived) [data-face="source"] {
-    background: #111;
-    border-color: #111;
+    background: var(--tint-2);
+    border-color: rgba(17, 17, 20, .17);
   }
   .faces .marble-on .fname,
-  .faces:not(.marble-derived) [data-face="source"] .fname { color: #fff; }
+  .faces:not(.marble-derived) [data-face="source"] .fname { color: var(--ink-3); }
   .faces .marble-on .fnote,
-  .faces:not(.marble-derived) [data-face="source"] .fnote { color: rgba(255, 255, 255, .5); }
+  .faces:not(.marble-derived) [data-face="source"] .fnote { color: rgba(17, 17, 20, .5); }
 
   .outline { margin: 0; padding: 0; list-style: none; display: grid; gap: 1px; }
   .outline li {
@@ -277,20 +304,60 @@
     padding: .26rem .4rem .26rem .3rem;
     border: 1px solid transparent;
     border-radius: 5px;
-    color: rgba(0, 0, 0, .72);
+    color: var(--ink-1);
     cursor: grab;
     user-select: none;
+    transition:
+      background-color var(--out) var(--ease),
+      border-color var(--out) var(--ease),
+      color var(--out) var(--ease),
+      opacity var(--out) var(--ease);
   }
-  .outline li:hover { background: rgba(0, 0, 0, .05); color: #111; }
+  .outline li:hover {
+    background: var(--tint-1);
+    color: var(--ink-3);
+    transition-duration: var(--in);
+  }
   .outline li.marble-dragging { opacity: .35; }
-  .outline li.marble-over { border-top-color: #111; }
-  .outline li.marble-over-after { border-bottom-color: #111; }
+  /* The drop line is the one place a firmer edge earns itself — it has to be
+     unmistakable mid-drag — but it is still ink rather than pure black. */
+  .outline li.marble-over { border-top-color: rgba(17, 17, 20, .55); }
+  .outline li.marble-over-after { border-bottom-color: rgba(17, 17, 20, .55); }
   .outline .dot {
     flex: none;
-    color: rgba(0, 0, 0, .25);
+    color: rgba(17, 17, 20, .22);
     font: 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    transition: color var(--out) var(--ease);
   }
+  .outline li:hover .dot { color: rgba(17, 17, 20, .42); }
   .outline .oname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* A hidden section keeps its row, or there would be no way back. */
+  .outline li.marble-off .oname { color: rgba(17, 17, 20, .34); text-decoration: line-through; }
+  .outline .eye {
+    flex: none;
+    margin-left: auto;
+    display: grid;
+    place-items: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: rgba(17, 17, 20, .28);
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      opacity var(--out) var(--ease),
+      color var(--out) var(--ease),
+      background-color var(--out) var(--ease);
+  }
+  .outline li:hover .eye,
+  .outline li.marble-off .eye,
+  .outline .eye:focus-visible { opacity: 1; transition-duration: var(--in); }
+  .outline .eye:hover { color: var(--ink-2); background: var(--tint-2); }
+  .outline .eye svg { width: 13px; height: 13px; display: block; }
 
   .rail .print {
     width: 100%;
@@ -300,10 +367,19 @@
     background: #fff;
     color: #111;
     font: 500 12px/1 system-ui, sans-serif;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
     cursor: pointer;
+    transition:
+      background-color var(--out) var(--ease),
+      border-color var(--out) var(--ease),
+      box-shadow var(--out) var(--ease);
   }
-  .rail .print:hover { background: #f2f2f4; }
+  .rail .print:hover {
+    background: #fafafb;
+    border-color: rgba(17, 17, 20, .24);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+    transition-duration: var(--in);
+  }
 
   /* A heading and the button that adds to what follows it. The button is out in
      the left margin, so the heading keeps the text edge to itself. */
@@ -327,12 +403,18 @@
     color: rgba(0, 0, 0, .3);
     font: 400 15px/1 system-ui, sans-serif;
     cursor: pointer;
-    transition: color .12s ease, background .12s ease;
+    transition:
+      color var(--out) var(--ease),
+      background-color var(--out) var(--ease);
   }
   /* Legible on its own, but it belongs to the heading it sits beside, so it
      only comes fully forward when you are actually there. */
-  .sec-block:hover .add { color: rgba(0, 0, 0, .45); }
-  .add:hover { color: #000; background: rgba(0, 0, 0, .07); }
+  .sec-block:hover .add { color: rgba(17, 17, 20, .42); }
+  .add:hover {
+    color: var(--ink-2);
+    background: var(--tint-2);
+    transition-duration: var(--in);
+  }
   .add:focus-visible { outline: 2px solid #5b8def; outline-offset: 1px; }
 
   /* Printing is the point of the document, so anything belonging to the editor
@@ -370,8 +452,8 @@
   <div class="rail-group" data-marble-id="rg-face">
     <h2 class="rail-title" data-marble-id="rt-face" data-marble-editable>Typeface</h2>
     <ul class="faces" data-marble-id="faces" data-marble-sortable="faces">
+      <li data-marble-id="li-source" data-marble-removable><button type="button" data-marble-id="f-source" data-face="source"><span class="fname" data-marble-id="fn-source">Source Sans 3</span><span class="fnote" data-marble-id="fd-source">Humanist sans </span></button></li>
       <li data-marble-id="li-charter" data-marble-removable><button type="button" data-marble-id="f-charter" data-face="charter"><span class="fname" data-marble-id="fn-charter">Charter</span><span class="fnote" data-marble-id="fd-charter">Transitional serif</span></button></li>
-      <li data-marble-id="li-source" data-marble-removable><button type="button" data-marble-id="f-source" data-face="source"><span class="fname" data-marble-id="fn-source">Source Sans 3</span><span class="fnote" data-marble-id="fd-source">Humanist sans</span></button></li>
       <li data-marble-id="li-newyork" data-marble-removable><button type="button" data-marble-id="f-newyork" data-face="newyork"><span class="fname" data-marble-id="fn-newyork">New York</span><span class="fnote" data-marble-id="fd-newyork">Modern serif</span></button></li>
     </ul>
     <p class="rail-note" data-marble-id="rn-face" data-marble-editable>Hover to try one on the page. Click to keep it.</p>
@@ -1012,17 +1094,30 @@
       .marble-grip {
         position: absolute; left: var(--lane); top: 0;
         display: flex; flex-direction: row; gap: 1px;
-        opacity: 0; transition: opacity .12s ease;
+        opacity: 0;
+        transition: opacity var(--out) var(--ease);
       }
-      .marble-item:hover > .marble-grip, .marble-grip:focus-within { opacity: 1; }
+      .marble-item:hover > .marble-grip, .marble-grip:focus-within {
+        opacity: 1;
+        transition-duration: var(--in);
+      }
       .marble-btn {
         display: grid; place-items: center;
         width: 1rem; height: 1.15rem; padding: 0; border: 0; border-radius: 4px;
-        background: none; color: currentColor; opacity: .34;
+        background: none; color: var(--ink-1); opacity: .55;
         font: 400 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
         cursor: pointer;
+        transition:
+          opacity var(--out) var(--ease),
+          color var(--out) var(--ease),
+          background-color var(--out) var(--ease);
       }
-      .marble-btn:hover { opacity: 1; background: rgba(127, 127, 127, .14); }
+      .marble-btn:hover {
+        opacity: 1;
+        color: var(--ink-3);
+        background: var(--tint-2);
+        transition-duration: var(--in);
+      }
       .marble-btn:focus-visible { opacity: 1; outline: 2px solid #5b8def; outline-offset: 1px; }
       .marble-handle { font-size: 14px; }
       .marble-remove { font-size: 15px; }
@@ -1088,7 +1183,8 @@
 
     // ---- removable ----
 
-    css.push(`.marble-remove:hover { color: #b4544f; }`);
+    // Muted rather than alarm-red: it is an undoable delete, not a warning.
+    css.push(`.marble-remove:hover { color: #9c5b57; background: rgba(156, 91, 87, .10); }`);
     addressable.push('[data-marble-removable]');
     wirers.push(wireRemovable);
 
@@ -1616,6 +1712,29 @@ document.querySelector('.rail .print')?.addEventListener('click', () => window.p
   const sections = () => [...doc.querySelectorAll(':scope > .sec-block')];
   const titleOf = (section) => section.querySelector('h2.sec')?.textContent?.trim() || 'Untitled';
 
+  const svg = (d) =>
+    `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"` +
+    ` stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const EYE = svg('<path d="M1 8s2.6-4.6 7-4.6S15 8 15 8s-2.6 4.6-7 4.6S1 8 1 8z"/><circle cx="8" cy="8" r="1.9"/>');
+  const EYE_OFF = svg(
+    '<path d="M6.5 3.6A7.7 7.7 0 0 1 8 3.4c4.4 0 7 4.6 7 4.6a13 13 0 0 1-2.2 2.8"/>' +
+    '<path d="M4.1 4.6A12.7 12.7 0 0 0 1 8s2.6 4.6 7 4.6a7.4 7.4 0 0 0 2.5-.4"/>' +
+    '<path d="M2.2 2.2l11.6 11.6"/>');
+
+  // Whether a section is in the CV is the standard `hidden` attribute on the
+  // section itself. One fact, in the place it describes — so a hidden section
+  // is hidden with no host, no script and no stylesheet, and it does not print.
+  function hide(section, off) {
+    section.toggleAttribute('hidden', off);
+    draw();
+    const id = window.marble?.id(section);
+    if (!id) return;
+    const redo = { type: 'setAttr', id, name: 'hidden', value: off ? '' : null };
+    const undo = { type: 'setAttr', id, name: 'hidden', value: off ? null : '' };
+    window.marble.record({ redo: [redo], undo: [undo] });
+    window.marble.op(redo, { immediate: true });
+  }
+
   let held = null;
 
   function draw() {
@@ -1625,10 +1744,23 @@ document.querySelector('.rail .print')?.addEventListener('click', () => window.p
       row.setAttribute('data-marble-transient', '');
       row.draggable = true;
       row.dataset.for = window.marble?.id(section) ?? '';
-      row.innerHTML = `<span class="dot">⠿</span><span class="oname"></span>`;
+      const off = section.hasAttribute('hidden');
+      row.classList.toggle('marble-off', off);
+      row.innerHTML =
+        `<span class="dot">⠿</span><span class="oname"></span>` +
+        `<button type="button" class="eye">${off ? EYE_OFF : EYE}</button>`;
       row.querySelector('.oname').textContent = titleOf(section);
 
+      const eye = row.querySelector('.eye');
+      eye.title = off ? 'Show in the CV' : 'Hide from the CV';
+      eye.setAttribute('aria-pressed', String(off));
+      eye.addEventListener('click', (event) => {
+        event.stopPropagation();   // the row means "jump to it"
+        hide(section, !off);
+      });
+
       row.addEventListener('click', () => {
+        if (section.hasAttribute('hidden')) return;   // nothing to scroll to
         section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
 
@@ -1707,6 +1839,10 @@ document.querySelector('.rail .print')?.addEventListener('click', () => window.p
     childList: true,
     subtree: true,
     characterData: true,
+    // Narrowed to `hidden` on purpose: watching every attribute would fire on
+    // the contenteditable the editor puts on half the document.
+    attributes: true,
+    attributeFilter: ['hidden'],
   });
 
   // And after a reconcile against the file, which replaces nodes wholesale.
