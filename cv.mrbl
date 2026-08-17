@@ -20,6 +20,11 @@
     --gutter: 0.86in;
     --indent: 0.28in;
     --gap: 0.12in;
+    --rail: 13.5rem;
+    /* Where margin furniture starts. The drag handle is the anchor, so a
+       grip and a + button share a left edge and the margin reads as one
+       column. */
+    --lane: -2.45rem;
   }
 
   * { box-sizing: border-box; }
@@ -32,6 +37,7 @@
     /* Only the desk. The sheet sets its own type, because the typeface is a
        property of the document rather than of the window it is shown in. */
     font: 10pt/1.34 system-ui, sans-serif;
+    padding-left: var(--rail);
     -webkit-font-smoothing: antialiased;
   }
 
@@ -59,10 +65,23 @@
      the font has not really given you a choice. Sizes are em-based from here
      down, so the whole hierarchy scales with the pick. */
 
+  /* Each stack is named once here, because two things need it: the sheet, and
+     the swatch in the rail that has to be set in the face it is offering. A
+     second copy in the rail would be the same fact written twice. */
+  :root {
+    --face-source:    "Source Sans 3", "Helvetica Neue", sans-serif;
+    --face-avenir:    "Avenir Next", Avenir, sans-serif;
+    --face-optima:    Optima, "Helvetica Neue", sans-serif;
+    --face-helvetica: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --face-charter:   Charter, Georgia, serif;
+    --face-newyork:   "New York", ui-serif, Georgia, serif;
+    --face-hoefler:   "Hoefler Text", Palatino, serif;
+  }
+
   .sheet {
     /* The default, and the fallback if the attribute names a face this
        document does not know — it still has to look deliberate. */
-    --face: "Source Sans 3", "Helvetica Neue", sans-serif;
+    --face: var(--face-source);
     --fsize: 10.4pt;
     --track: 0;
     --leading: 1.34;
@@ -74,36 +93,15 @@
   }
 
   /* sans */
-  .sheet[data-font="source"] {
-    --face: "Source Sans 3", "Helvetica Neue", sans-serif;
-    --fsize: 10.4pt; --track: 0; --leading: 1.34;
-  }
-  .sheet[data-font="avenir"] {
-    --face: "Avenir Next", Avenir, sans-serif;
-    --fsize: 9.9pt; --track: -.004em; --leading: 1.35;
-  }
-  .sheet[data-font="optima"] {
-    --face: Optima, "Helvetica Neue", sans-serif;
-    --fsize: 10.6pt; --track: 0; --leading: 1.33;
-  }
-  .sheet[data-font="helvetica"] {
-    --face: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    --fsize: 10pt; --track: -.006em; --leading: 1.34;
-  }
+  .sheet[data-font="source"]    { --face: var(--face-source);    --fsize: 10.4pt; --track: 0;       --leading: 1.34; }
+  .sheet[data-font="avenir"]    { --face: var(--face-avenir);    --fsize: 9.9pt;  --track: -.004em; --leading: 1.35; }
+  .sheet[data-font="optima"]    { --face: var(--face-optima);    --fsize: 10.6pt; --track: 0;       --leading: 1.33; }
+  .sheet[data-font="helvetica"] { --face: var(--face-helvetica); --fsize: 10pt;   --track: -.006em; --leading: 1.34; }
 
   /* serif */
-  .sheet[data-font="charter"] {
-    --face: Charter, Georgia, serif;
-    --fsize: 10.1pt; --track: -.003em; --leading: 1.33;
-  }
-  .sheet[data-font="newyork"] {
-    --face: "New York", ui-serif, Georgia, serif;
-    --fsize: 10.4pt; --track: 0; --leading: 1.33;
-  }
-  .sheet[data-font="hoefler"] {
-    --face: "Hoefler Text", Palatino, serif;
-    --fsize: 10.9pt; --track: 0; --leading: 1.31;
-  }
+  .sheet[data-font="charter"]   { --face: var(--face-charter);   --fsize: 10.1pt; --track: -.003em; --leading: 1.33; }
+  .sheet[data-font="newyork"]   { --face: var(--face-newyork);   --fsize: 10.4pt; --track: 0;       --leading: 1.33; }
+  .sheet[data-font="hoefler"]   { --face: var(--face-hoefler);   --fsize: 10.9pt; --track: 0;       --leading: 1.31; }
 
   /* ---- masthead ---- */
 
@@ -177,47 +175,165 @@
 
   /* ---- the bits that are the app rather than the document ---- */
 
-  .bar {
+  /* The rail. Fixed to the left edge and pushed off the paper by a body
+     padding, so the sheet still centres in whatever is left rather than
+     sliding under it. */
+  .rail {
     position: fixed;
-    right: 1rem;
-    top: 1rem;
+    left: 0; top: 0; bottom: 0;
     z-index: 50;
-    display: flex;
-    gap: .4rem;
-  }
-  .bar button {
-    padding: .42rem .8rem;
-    border: 1px solid rgba(0, 0, 0, .16);
-    border-radius: 7px;
-    background: #fff;
+    width: var(--rail);
+    padding: 1.1rem .85rem;
+    overflow-y: auto;
+    border-right: 1px solid rgba(0, 0, 0, .09);
+    background: #fbfbfc;
+    font: 12px/1.4 system-ui, sans-serif;
     color: #111;
-    font: 500 12px/1 "Proxima Nova", "Helvetica Neue", Arial, sans-serif;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+  }
+  .rail-group + .rail-group { margin-top: 1.3rem; }
+  .rail-title {
+    margin: 0 0 .45rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, .4);
+  }
+  .rail-note {
+    margin: .5rem 0 0;
+    font-size: 10.5px;
+    line-height: 1.45;
+    color: rgba(0, 0, 0, .38);
+  }
+
+  /* A grip hangs off its item's left edge, which works in a page with a margin
+     and not at all in a rail pinned to the window. In here they turn inward. */
+  .rail .marble-grip {
+    left: auto;
+    right: .25rem;
+    background: rgba(251, 251, 252, .92);
+    border-radius: 5px;
+  }
+  /* The rail's own groups reorder too, so Export can sit above Typeface. Its
+     grip rides at the top, level with the group's label. */
+  .rail > .rail-group > .marble-grip { top: .05rem; }
+  .rail-group.marble-dragging { opacity: .4; }
+
+  .faces { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+  .faces > li > .marble-grip { top: 50%; transform: translateY(-50%); }
+  /* On the chosen swatch the plate would be a white block on black, so it
+     drops out and the icons invert instead. The grip is prepended, so it is
+     never the button's next sibling — this has to ask the row, not the button. */
+  .faces .marble-item:has(.marble-on) > .marble-grip { background: none; }
+  .faces .marble-item:has(.marble-on) .marble-btn { color: #fff; }
+  .faces button {
+    display: block;
+    width: 100%;
+    padding: .4rem .5rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: none;
+    color: #111;
+    text-align: left;
     cursor: pointer;
   }
-  .bar button:hover { background: #f6f6f7; }
-  .bar .face {
-    padding: .42rem .55rem;
+  .faces button:hover { background: rgba(0, 0, 0, .05); }
+  .faces button:focus-visible { outline: 2px solid #5b8def; outline-offset: -1px; }
+  /* The swatch is set in the face it is offering — that is the preview. */
+  .faces .fname { display: block; font-size: 14px; line-height: 1.25; }
+  .faces .fnote {
+    display: block;
+    font: 10px/1.3 system-ui, sans-serif;
+    color: rgba(0, 0, 0, .4);
+    letter-spacing: .02em;
+  }
+  .faces [data-face="source"]    .fname { font-family: var(--face-source); }
+  .faces [data-face="avenir"]    .fname { font-family: var(--face-avenir); }
+  .faces [data-face="optima"]    .fname { font-family: var(--face-optima); }
+  .faces [data-face="helvetica"] .fname { font-family: var(--face-helvetica); }
+  .faces [data-face="charter"]   .fname { font-family: var(--face-charter); }
+  .faces [data-face="newyork"]   .fname { font-family: var(--face-newyork); }
+  .faces [data-face="hoefler"]   .fname { font-family: var(--face-hoefler); }
+
+  /* Which one is on cannot be a CSS match — it means "the child whose value
+     equals the sheet's attribute", and a selector cannot ask that. So a script
+     derives it into a marble- class, and a static default covers the case where
+     there is no host to derive anything. */
+  .faces .marble-on,
+  .faces:not(.marble-derived) [data-face="source"] {
+    background: #111;
+    border-color: #111;
+  }
+  .faces .marble-on .fname,
+  .faces:not(.marble-derived) [data-face="source"] .fname { color: #fff; }
+  .faces .marble-on .fnote,
+  .faces:not(.marble-derived) [data-face="source"] .fnote { color: rgba(255, 255, 255, .5); }
+
+  .outline { margin: 0; padding: 0; list-style: none; display: grid; gap: 1px; }
+  .outline li {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .26rem .4rem .26rem .3rem;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, .72);
+    cursor: grab;
+    user-select: none;
+  }
+  .outline li:hover { background: rgba(0, 0, 0, .05); color: #111; }
+  .outline li.marble-dragging { opacity: .35; }
+  .outline li.marble-over { border-top-color: #111; }
+  .outline li.marble-over-after { border-bottom-color: #111; }
+  .outline .dot {
+    flex: none;
+    color: rgba(0, 0, 0, .25);
+    font: 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .outline .oname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .rail .print {
+    width: 100%;
+    padding: .48rem .8rem;
     border: 1px solid rgba(0, 0, 0, .16);
     border-radius: 7px;
     background: #fff;
     color: #111;
     font: 500 12px/1 system-ui, sans-serif;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
     cursor: pointer;
   }
+  .rail .print:hover { background: #f2f2f4; }
 
+  /* A heading and the button that adds to what follows it. The button is out in
+     the left margin, so the heading keeps the text edge to itself. */
+  .head-row { position: relative; }
+  /* Same lane and the same right edge as a grip, so the margin reads as one
+     column of controls rather than three things that happen to be left of the
+     text. `right: 100%` measures from the content edge, which is what every
+     other piece of furniture is measured from too. */
   .add {
-    margin: 2pt 0 0 var(--gutter);
-    padding: 1pt 6pt;
-    border: 1px dashed rgba(0, 0, 0, .22);
-    border-radius: 5px;
+    position: absolute;
+    left: var(--lane);
+    top: .12em;
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1.15rem;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
     background: none;
-    color: rgba(0, 0, 0, .45);
-    font: 500 9pt/1.5 inherit;
+    color: rgba(0, 0, 0, .3);
+    font: 400 15px/1 system-ui, sans-serif;
     cursor: pointer;
+    transition: color .12s ease, background .12s ease;
   }
-  .add:hover { color: #000; border-color: rgba(0, 0, 0, .5); }
+  /* Legible on its own, but it belongs to the heading it sits beside, so it
+     only comes fully forward when you are actually there. */
+  .sec-block:hover .add { color: rgba(0, 0, 0, .45); }
+  .add:hover { color: #000; background: rgba(0, 0, 0, .07); }
+  .add:focus-visible { outline: 2px solid #5b8def; outline-offset: 1px; }
 
   /* Printing is the point of the document, so anything belonging to the editor
      leaves — and the sheet stops being a sheet, because @page owns the margins
@@ -231,7 +347,8 @@
       padding: 0;
       box-shadow: none;
     }
-    .bar, .add { display: none !important; }
+    body { padding-left: 0; }
+    .rail, .add { display: none !important; }
     .pub, .entry { break-inside: avoid; }
     h2.sec, h3.sub { break-after: avoid; }
   }
@@ -239,20 +356,38 @@
 </head>
 <body>
 
-<div class="bar" data-marble-id="bar">
-  <select class="face" data-marble-id="bar-face" aria-label="Typeface">
-    <option data-marble-id="f-source" value="source">Source Sans 3</option>
-    <option data-marble-id="f-avenir" value="avenir">Avenir Next</option>
-    <option data-marble-id="f-optima" value="optima">Optima</option>
-    <option data-marble-id="f-helvetica" value="helvetica">Helvetica Neue</option>
-    <option data-marble-id="f-charter" value="charter">Charter</option>
-    <option data-marble-id="f-newyork" value="newyork">New York</option>
-    <option data-marble-id="f-hoefler" value="hoefler">Hoefler Text</option>
-  </select>
-  <button class="print" data-marble-id="bar-pdf" type="button">Download PDF</button>
-</div>
+<aside class="rail" data-marble-id="rail" data-marble-sortable="rail">
 
-<main class="sheet" data-marble-id="sheet" data-font="source">
+
+
+
+
+  <div class="rail-group" data-marble-id="rg-out">
+    <h2 class="rail-title" data-marble-id="rt-out" data-marble-editable>Export</h2>
+    <button class="print" data-marble-id="bar-pdf" type="button">Download PDF</button>
+    <p class="rail-note" data-marble-id="rn-out" data-marble-editable>In the print dialog, untick “Headers and footers”.</p>
+  </div>
+  <div class="rail-group" data-marble-id="rg-face">
+    <h2 class="rail-title" data-marble-id="rt-face" data-marble-editable>Typeface</h2>
+    <ul class="faces" data-marble-id="faces" data-marble-sortable="faces">
+      <li data-marble-id="li-charter" data-marble-removable><button type="button" data-marble-id="f-charter" data-face="charter"><span class="fname" data-marble-id="fn-charter">Charter</span><span class="fnote" data-marble-id="fd-charter">Transitional serif</span></button></li>
+      <li data-marble-id="li-source" data-marble-removable><button type="button" data-marble-id="f-source" data-face="source"><span class="fname" data-marble-id="fn-source">Source Sans 3</span><span class="fnote" data-marble-id="fd-source">Humanist sans</span></button></li>
+      <li data-marble-id="li-newyork" data-marble-removable><button type="button" data-marble-id="f-newyork" data-face="newyork"><span class="fname" data-marble-id="fn-newyork">New York</span><span class="fnote" data-marble-id="fd-newyork">Modern serif</span></button></li>
+    </ul>
+    <p class="rail-note" data-marble-id="rn-face" data-marble-editable>Hover to try one on the page. Click to keep it.</p>
+  </div>
+  <div class="rail-group" data-marble-id="rg-outline">
+    <h2 class="rail-title" data-marble-id="rt-outline" data-marble-editable>Sections</h2>
+    <!-- Filled from the document. The names and their order are already in the
+         sheet, so writing them here too would be the same fact twice, and the
+         copy would be the one that went stale. -->
+    <ol class="outline" data-marble-id="outline"></ol>
+    <p class="rail-note" data-marble-id="rn-outline" data-marble-editable>Drag to reorder the CV. Click to jump.</p>
+  </div>
+
+</aside>
+
+<main class="sheet" data-marble-id="sheet" data-font="charter">
 
   <header class="masthead" data-marble-id="masthead">
     <h1 class="name" data-marble-id="name" data-marble-editable>Bryan Min</h1>
@@ -261,463 +396,516 @@
       <div data-marble-id="site" data-marble-editable>bryanmin.me</div>
     </div>
   </header>
+  <!-- The sections, as elements. Dragging one in the rail outline files a
+       move against the section it names, which is why each is one node. -->
+  <!-- Not sortable in the page. A section's grip would land in the same strip
+       of margin as the + button of the heading inside it, and hovering one
+       publication lit up two grips at once — its own and its section's. The
+       rail outline is the better gesture for something two pages long, so
+       sections are moved from there and the margin belongs to the entries. -->
+  <div class="doc" data-marble-id="doc">
 
-  <!-- ================= EDUCATION ================= -->
 
-  <h2 class="sec" data-marble-id="s-edu" data-marble-editable>Education</h2>
+  <section class="sec-block" data-marble-id="blk-edu" aria-label="Education">
+    <!-- ================= EDUCATION ================= -->
 
-  <div data-marble-id="edu-list" data-marble-sortable="edu">
-    <div class="entry" data-marble-id="edu-ucsd" data-marble-removable>
-      <div class="org" data-marble-id="edu-ucsd-org" data-marble-editable>University of California San Diego</div>
-      <div class="row indent" data-marble-id="edu-phd">
-        <span data-marble-id="edu-phd-l" data-marble-editable>Ph.D. in Cognitive Science. Advisor: Haijun Xia</span>
-        <span class="r" data-marble-id="edu-phd-r" data-marble-editable>Expected June 2029</span>
-      </div>
-      <div class="row indent" data-marble-id="edu-bs">
-        <span data-marble-id="edu-bs-l" data-marble-editable>B.S. in Computer Science (Magna Cum Laude)</span>
-        <span class="r" data-marble-id="edu-bs-r" data-marble-editable>June 2023</span>
+    <h2 class="sec" data-marble-id="s-edu" data-marble-editable>Education</h2>
+
+    <div data-marble-id="edu-list" data-marble-sortable="edu">
+      <div class="entry" data-marble-id="edu-ucsd" data-marble-removable>
+        <div class="org" data-marble-id="edu-ucsd-org" data-marble-editable>University of California San Diego</div>
+        <div class="row indent" data-marble-id="edu-phd">
+          <span data-marble-id="edu-phd-l" data-marble-editable>Ph.D. in Cognitive Science. Advisor: Haijun Xia</span>
+          <span class="r" data-marble-id="edu-phd-r" data-marble-editable>Expected June 2029</span>
+        </div>
+        <div class="row indent" data-marble-id="edu-bs">
+          <span data-marble-id="edu-bs-l" data-marble-editable>B.S. in Computer Science (Magna Cum Laude)</span>
+          <span class="r" data-marble-id="edu-bs-r" data-marble-editable>June 2023</span>
+        </div>
       </div>
     </div>
+  </section>
+  <section class="sec-block" data-marble-id="blk-pub" aria-label="Publications">
+    <!-- ================= PUBLICATIONS ================= -->
+
+    <h2 class="sec" data-marble-id="s-pub" data-marble-editable>Publications</h2>
+
+    <div class="head-row" data-marble-id="hr-h-conf">
+      <button class="add" data-marble-id="add-conf" type="button" data-cv-form="pub" data-marble-add="#tpl-pub" data-marble-into="next" data-cv-prefix="C">+</button>
+      <h3 class="sub" data-marble-id="h-conf" data-marble-editable>Conference Papers</h3>
+    </div>
+    <div data-marble-id="conf" data-marble-sortable="pubs">
+
+      <div class="pub" data-marble-id="c7" data-marble-removable>
+        <div class="key" data-marble-id="c7-k" data-marble-editable>2026 [C7]</div>
+        <div class="body" data-marble-id="c7-b">
+          <p class="title" data-marble-id="c7-t" data-marble-editable>Maru: Information Architecture as a Shared Language for Generating Aligned and Persistent User Interfaces</p>
+          <p class="authors" data-marble-id="c7-a"><span data-marble-id="c7-a1" data-marble-editable>Eunhye Kim, DaEun Choi, </span><strong data-marble-id="c7-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c7-a2" data-marble-editable>, Hyunjung Yi, Yue Jiang, Juho Kim</span></p>
+          <p class="venue" data-marble-id="c7-v" data-marble-editable>UIST 2026: Proceedings of the 2025 ACM Symposium on User Interface Software and Technology</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="c6" data-marble-removable>
+        <div class="key" data-marble-id="c6-k" data-marble-editable>2026 [C6]</div>
+        <div class="body" data-marble-id="c6-b">
+          <p class="title" data-marble-id="c6-t" data-marble-editable>ChoiceMates: Supporting Unfamiliar Online Decision-Making with Multi-Agent Conversational Interactions</p>
+          <p class="authors" data-marble-id="c6-a"><span data-marble-id="c6-a1" data-marble-editable>Jeongeon Park, </span><strong data-marble-id="c6-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c6-a2" data-marble-editable>, Kihoon Son, Jean Y. Song, Xiaojuan Ma, Juho Kim</span></p>
+          <p class="venue" data-marble-id="c6-v" data-marble-editable>IUI 2026: Proceedings of the 2026 ACM Conference on Intelligent User Interfaces</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="c5" data-marble-removable>
+        <div class="key" data-marble-id="c5-k" data-marble-editable>2025 [C5]</div>
+        <div class="body" data-marble-id="c5-b">
+          <p class="title" data-marble-id="c5-t" data-marble-editable>Meridian: A Design Framework for Malleable Overview-Detail Interfaces</p>
+          <p class="authors" data-marble-id="c5-a"><strong data-marble-id="c5-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c5-a2" data-marble-editable> and Haijun Xia</span></p>
+          <p class="venue" data-marble-id="c5-v" data-marble-editable>UIST 2025: Proceedings of the 2025 ACM Symposium on User Interface Software and Technology</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="c4" data-marble-removable>
+        <div class="key" data-marble-id="c4-k" data-marble-editable>2025 [C4]</div>
+        <div class="body" data-marble-id="c4-b">
+          <p class="title" data-marble-id="c4-t" data-marble-editable>Lessons from Designing a Course and Platform for Teaching Qualitative Analysis Experientially in a Large Course-Based Community Consultancy</p>
+          <p class="authors" data-marble-id="c4-a"><span data-marble-id="c4-a1" data-marble-editable>Dustin Palea, Elijah Kirby, Madison Gruender, </span><strong data-marble-id="c4-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c4-a2" data-marble-editable>, Jessalyn Wang, David T. Lee</span></p>
+          <p class="venue" data-marble-id="c4-v" data-marble-editable>ICER 2025: Proceedings of the ACM Conference on International Computing Education Research</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="c3" data-marble-removable>
+        <div class="key" data-marble-id="c3-k" data-marble-editable>2025 [C3]</div>
+        <div class="body" data-marble-id="c3-b">
+          <p class="title" data-marble-id="c3-t" data-marble-editable>Malleable Overview-Detail Interfaces</p>
+          <p class="authors" data-marble-id="c3-a"><strong data-marble-id="c3-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c3-a2" data-marble-editable>, Allen Chen, Yining Cao, Haijun Xia</span></p>
+          <p class="venue" data-marble-id="c3-v" data-marble-editable>CHI 2025: Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="c2" data-marble-removable>
+        <div class="key" data-marble-id="c2-k" data-marble-editable>2024 [C2]</div>
+        <div class="body" data-marble-id="c2-b">
+          <p class="title" data-marble-id="c2-t" data-marble-editable>Luminate: Structured Generation and Exploration of Design Space with Large Language Models for Human-AI Co-Creation</p>
+          <p class="authors" data-marble-id="c2-a"><span data-marble-id="c2-a1" data-marble-editable>Sangho Suh, Meng Chen, </span><strong data-marble-id="c2-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c2-a2" data-marble-editable>, Toby Jia-Jun Li, Haijun Xia</span></p>
+          <p class="venue" data-marble-id="c2-v" data-marble-editable>CHI 2024: Proceedings of the 2024 CHI Conference on Human Factors in Computing Systems</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="c1" data-marble-removable>
+        <div class="key" data-marble-id="c1-k" data-marble-editable>2023 [C1]</div>
+        <div class="body" data-marble-id="c1-b">
+          <p class="title" data-marble-id="c1-t" data-marble-editable>Sensecape: Enabling Multilevel Exploration and Sensemaking with Large Language Models</p>
+          <p class="authors" data-marble-id="c1-a"><span data-marble-id="c1-a1" data-marble-editable>Sangho Suh, </span><strong data-marble-id="c1-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c1-a2" data-marble-editable>, Srishti Palani, Haijun Xia</span></p>
+          <p class="venue" data-marble-id="c1-v" data-marble-editable>UIST 2023: Proceedings of the 2023 ACM Symposium on User Interface Software and Technology</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="head-row" data-marble-id="hr-h-pre">
+      <button class="add" data-marble-id="add-pre" type="button" data-cv-form="pub" data-marble-add="#tpl-pub" data-marble-into="next" data-cv-prefix="R">+</button>
+      <h3 class="sub" data-marble-id="h-pre" data-marble-editable>Preprints</h3>
+    </div>
+    <div data-marble-id="pre" data-marble-sortable="pubs">
+
+      <div class="pub" data-marble-id="r2" data-marble-removable>
+        <div class="key" data-marble-id="r2-k" data-marble-editable>2026 [R2]</div>
+        <div class="body" data-marble-id="r2-b">
+          <p class="title" data-marble-id="r2-t" data-marble-editable>Making Abstraction Concrete: A Design Space and Interaction Model of Abstraction in Interactive Systems</p>
+          <p class="authors" data-marble-id="r2-a"><strong data-marble-id="r2-me" data-marble-editable>Bryan Min</strong><span data-marble-id="r2-a2" data-marble-editable>, Sangho Suh, Jim Hollan, Haijun Xia</span></p>
+          <p class="venue" data-marble-id="r2-v" data-marble-editable>May 2026 - arXiv:2605.11344</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="r1" data-marble-removable>
+        <div class="key" data-marble-id="r1-k" data-marble-editable>2026 [R1]</div>
+        <div class="body" data-marble-id="r1-b">
+          <p class="title" data-marble-id="r1-t" data-marble-editable>Gradual Generation of User Interfaces as a Design Method for Malleable Software</p>
+          <p class="authors" data-marble-id="r1-a"><strong data-marble-id="r1-me" data-marble-editable>Bryan Min</strong><span data-marble-id="r1-a2" data-marble-editable>, Peiling Jiang, Zhicheng Huang, Haijun Xia</span></p>
+          <p class="venue" data-marble-id="r1-v" data-marble-editable>January 2026 - arXiv:2601.17975</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="head-row" data-marble-id="hr-h-pos">
+      <button class="add" data-marble-id="add-pos" type="button" data-cv-form="pub" data-marble-add="#tpl-pub" data-marble-into="next" data-cv-prefix="P">+</button>
+      <h3 class="sub" data-marble-id="h-pos" data-marble-editable>Posters, Demos, Workshop Papers</h3>
+    </div>
+    <div data-marble-id="pos" data-marble-sortable="pubs">
+
+      <div class="pub" data-marble-id="p7" data-marble-removable>
+        <div class="key" data-marble-id="p7-k" data-marble-editable>2026 [P7]</div>
+        <div class="body" data-marble-id="p7-b">
+          <p class="title" data-marble-id="p7-t" data-marble-editable>Jacaranda: Grafting User-Editable Web Experiences Across Sites</p>
+          <p class="authors" data-marble-id="p7-a"><span data-marble-id="p7-a1" data-marble-editable>Xinqi Zhang, Mingyuan Zhong, Longjie Guo, </span><strong data-marble-id="p7-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p7-a2" data-marble-editable>, Yuanhao Zhang, Kai Lukoff</span></p>
+          <p class="venue" data-marble-id="p7-v" data-marble-editable>UIST 2026 Posters</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="p6" data-marble-removable>
+        <div class="key" data-marble-id="p6-k" data-marble-editable>2026 [P6]</div>
+        <div class="body" data-marble-id="p6-b">
+          <p class="title" data-marble-id="p6-t" data-marble-editable>Generative UI Alone Won’t Make Software Malleable</p>
+          <p class="authors" data-marble-id="p6-a"><strong data-marble-id="p6-me" data-marble-editable>Bryan Min</strong></p>
+          <p class="venue" data-marble-id="p6-v" data-marble-editable>CHI 2025 Workshop on HCI for GenUI</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="p5" data-marble-removable>
+        <div class="key" data-marble-id="p5-k" data-marble-editable>2026 [P5]</div>
+        <div class="body" data-marble-id="p5-b">
+          <p class="title" data-marble-id="p5-t" data-marble-editable>User-Constructed Information Architecture as a Persistence Layer for GenUI</p>
+          <p class="authors" data-marble-id="p5-a"><span data-marble-id="p5-a1" data-marble-editable>Eunhye Kim, Hyunjung Yi, Daeun Choi, </span><strong data-marble-id="p5-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p5-a2" data-marble-editable>, Yue Jiang, Juho Kim</span></p>
+          <p class="venue" data-marble-id="p5-v" data-marble-editable>CHI 2025 Workshop on HCI for GenUI</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="p4" data-marble-removable>
+        <div class="key" data-marble-id="p4-k" data-marble-editable>2026 [P4]</div>
+        <div class="body" data-marble-id="p4-b">
+          <p class="title" data-marble-id="p4-t" data-marble-editable>User Agency in Runtime Malleable Software Under Change Aversion</p>
+          <p class="authors" data-marble-id="p4-a"><span data-marble-id="p4-a1" data-marble-editable>Xinqi Zhang, </span><strong data-marble-id="p4-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p4-a2" data-marble-editable>, Shizhao L. Liu, Kai Lukoff</span></p>
+          <p class="venue" data-marble-id="p4-v" data-marble-editable>CHI 2025 Workshop on HCI for GenUI</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="p3" data-marble-removable>
+        <div class="key" data-marble-id="p3-k" data-marble-editable>2025 [P3]</div>
+        <div class="body" data-marble-id="p3-b">
+          <p class="title" data-marble-id="p3-t" data-marble-editable>Feedforward in Generative AI: Opportunities for a Design Space</p>
+          <p class="authors" data-marble-id="p3-a"><strong data-marble-id="p3-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p3-a2" data-marble-editable> and Haijun Xia</span></p>
+          <p class="venue" data-marble-id="p3-v" data-marble-editable>CHI 2025 Workshop on Tools for Thought</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="p2" data-marble-removable>
+        <div class="key" data-marble-id="p2-k" data-marble-editable>2024 [P2]</div>
+        <div class="body" data-marble-id="p2-b">
+          <p class="title" data-marble-id="p2-t" data-marble-editable>How do multiple LLM-powered conversational agents assist sensemaking and decision-making in an unfamiliar domain?</p>
+          <p class="authors" data-marble-id="p2-a"><span data-marble-id="p2-a1" data-marble-editable>Jeongeon Park, </span><strong data-marble-id="p2-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p2-a2" data-marble-editable>, Jean Y. Song, Xiaojuan Ma, Juho Kim</span></p>
+          <p class="venue" data-marble-id="p2-v" data-marble-editable>CHI 2024 Sensemaking Workshop</p>
+        </div>
+      </div>
+
+      <div class="pub" data-marble-id="p1" data-marble-removable>
+        <div class="key" data-marble-id="p1-k" data-marble-editable>2023 [P1]</div>
+        <div class="body" data-marble-id="p1-b">
+          <p class="title" data-marble-id="p1-t" data-marble-editable>Demonstration of Masonview: Content-Driven Viewport Management</p>
+          <p class="authors" data-marble-id="p1-a"><strong data-marble-id="p1-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p1-a2" data-marble-editable>, Matthew T. Beaudouin-Lafon, Sangho Suh, Haijun Xia</span></p>
+          <p class="venue" data-marble-id="p1-v" data-marble-editable>UIST 2023 Demos</p>
+          <p class="award" data-marble-id="p1-w" data-marble-editable>🏅Best Demo Honorable Mention Award</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="head-row" data-marble-id="hr-h-pat">
+      <button class="add" data-marble-id="add-pat" type="button" data-cv-form="pub" data-marble-add="#tpl-pub" data-marble-into="next" data-cv-prefix="A">+</button>
+      <h3 class="sub" data-marble-id="h-pat" data-marble-editable>Patents</h3>
+    </div>
+    <div data-marble-id="pat" data-marble-sortable="pubs">
+
+      <div class="pub" data-marble-id="a1" data-marble-removable>
+        <div class="key" data-marble-id="a1-k" data-marble-editable>2026 [A1]</div>
+        <div class="body" data-marble-id="a1-b">
+          <p class="title" data-marble-id="a1-t" data-marble-editable>Methods and systems for generating malleable overview-detail user interfaces</p>
+          <p class="authors" data-marble-id="a1-a"><span data-marble-id="a1-a1" data-marble-editable>Haijun Xia and </span><strong data-marble-id="a1-me" data-marble-editable>Bryan Min</strong></p>
+          <p class="venue" data-marble-id="a1-v" data-marble-editable>US Patent App. 19/376,807</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="sec-block" data-marble-id="blk-res" aria-label="Research Experience">
+    <!-- ================= RESEARCH EXPERIENCE ================= -->
+
+    <div class="head-row" data-marble-id="hr-s-res">
+      <button class="add" data-marble-id="add-res" type="button" data-cv-form="exp" data-marble-add="#tpl-exp" data-marble-into="next">+</button>
+      <h2 class="sec" data-marble-id="s-res" data-marble-editable>Research Experience</h2>
+    </div>
+
+    <div data-marble-id="res" data-marble-sortable="exp">
+
+      <div class="entry" data-marble-id="res-msft" data-marble-removable>
+        <div class="row" data-marble-id="res-msft-1">
+          <span class="org" data-marble-id="res-msft-org" data-marble-editable>FX and EPIC Research Group, Microsoft</span>
+          <span class="r" data-marble-id="res-msft-when" data-marble-editable>May 2026 – Current</span>
+        </div>
+        <div class="row" data-marble-id="res-msft-2">
+          <span data-marble-id="res-msft-role" data-marble-editable>Research Intern</span>
+          <span class="r" data-marble-id="res-msft-where" data-marble-editable>Redmond, WA</span>
+        </div>
+        <div data-marble-id="res-msft-sup" data-marble-editable>Supervisor: Nic Marquardt</div>
+      </div>
+
+      <div class="entry" data-marble-id="res-fil2" data-marble-removable>
+        <div class="row" data-marble-id="res-fil2-1">
+          <span class="org" data-marble-id="res-fil2-org" data-marble-editable>Foundation Interface Lab, UC San Diego</span>
+          <span class="r" data-marble-id="res-fil2-when" data-marble-editable>September 2023 - September 2024</span>
+        </div>
+        <div class="row" data-marble-id="res-fil2-2">
+          <span data-marble-id="res-fil2-role" data-marble-editable>Researcher</span>
+          <span class="r" data-marble-id="res-fil2-where" data-marble-editable>La Jolla, CA</span>
+        </div>
+        <div data-marble-id="res-fil2-sup" data-marble-editable>Supervisor: Haijun Xia [C3]</div>
+      </div>
+
+      <div class="entry" data-marble-id="res-kix" data-marble-removable>
+        <div class="row" data-marble-id="res-kix-1">
+          <span class="org" data-marble-id="res-kix-org" data-marble-editable>KIXLAB, KAIST</span>
+          <span class="r" data-marble-id="res-kix-when" data-marble-editable>July 2023 - September 2023</span>
+        </div>
+        <div class="row" data-marble-id="res-kix-2">
+          <span data-marble-id="res-kix-role" data-marble-editable>Undergraduate Research Intern</span>
+          <span class="r" data-marble-id="res-kix-where" data-marble-editable>Daejeon, South Korea</span>
+        </div>
+        <div data-marble-id="res-kix-sup" data-marble-editable>Supervisor: Juho Kim [P2]</div>
+      </div>
+
+      <div class="entry" data-marble-id="res-fil1" data-marble-removable>
+        <div class="row" data-marble-id="res-fil1-1">
+          <span class="org" data-marble-id="res-fil1-org" data-marble-editable>Foundation Interface Lab, UC San Diego</span>
+          <span class="r" data-marble-id="res-fil1-when" data-marble-editable>November 2022 - June 2023</span>
+        </div>
+        <div class="row" data-marble-id="res-fil1-2">
+          <span data-marble-id="res-fil1-role" data-marble-editable>Undergraduate Researcher</span>
+          <span class="r" data-marble-id="res-fil1-where" data-marble-editable>La Jolla, CA</span>
+        </div>
+        <div data-marble-id="res-fil1-sup" data-marble-editable>Supervisor: Haijun Xia [C1, C2, P1]</div>
+      </div>
+
+      <div class="entry" data-marble-id="res-t4g" data-marble-removable>
+        <div class="row" data-marble-id="res-t4g-1">
+          <span class="org" data-marble-id="res-t4g-org" data-marble-editable>Tech4Good Lab, UC Santa Cruz</span>
+          <span class="r" data-marble-id="res-t4g-when" data-marble-editable>January 2021 - January 2023</span>
+        </div>
+        <div class="row" data-marble-id="res-t4g-2">
+          <span data-marble-id="res-t4g-role" data-marble-editable>Undergraduate Researcher</span>
+          <span class="r" data-marble-id="res-t4g-where" data-marble-editable>Santa Cruz, CA</span>
+        </div>
+        <div data-marble-id="res-t4g-sup" data-marble-editable>Supervisor: David T. Lee [C4]</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="sec-block" data-marble-id="blk-pro" aria-label="Professional Experience">
+    <!-- ================= PROFESSIONAL EXPERIENCE ================= -->
+
+    <div class="head-row" data-marble-id="hr-s-pro">
+      <button class="add" data-marble-id="add-pro" type="button" data-cv-form="exp" data-marble-add="#tpl-exp" data-marble-into="next">+</button>
+      <h2 class="sec" data-marble-id="s-pro" data-marble-editable>Professional Experience</h2>
+    </div>
+
+    <div data-marble-id="pro" data-marble-sortable="exp">
+
+      <div class="entry" data-marble-id="pro-comm" data-marble-removable>
+        <div class="row" data-marble-id="pro-comm-1">
+          <span class="org" data-marble-id="pro-comm-org" data-marble-editable>Communications Department, UC San Diego</span>
+          <span class="r" data-marble-id="pro-comm-when" data-marble-editable>October 2022 - July 2023</span>
+        </div>
+        <div class="row" data-marble-id="pro-comm-2">
+          <span data-marble-id="pro-comm-role" data-marble-editable>Data Visualization Developer</span>
+          <span class="r" data-marble-id="pro-comm-where" data-marble-editable>La Jolla, CA</span>
+        </div>
+      </div>
+
+      <div class="entry" data-marble-id="pro-att" data-marble-removable>
+        <div class="row" data-marble-id="pro-att-1">
+          <span class="org" data-marble-id="pro-att-org" data-marble-editable>AT&amp;T</span>
+          <span class="r" data-marble-id="pro-att-when" data-marble-editable>June 2022 - September 2022</span>
+        </div>
+        <div class="row" data-marble-id="pro-att-2">
+          <span data-marble-id="pro-att-role" data-marble-editable>Software Engineer Intern</span>
+          <span class="r" data-marble-id="pro-att-where" data-marble-editable>Chicago, IL</span>
+        </div>
+      </div>
+
+      <div class="entry" data-marble-id="pro-cse" data-marble-removable>
+        <div class="row" data-marble-id="pro-cse-1">
+          <span class="org" data-marble-id="pro-cse-org" data-marble-editable>CSE Department, UC San Diego</span>
+          <span class="r" data-marble-id="pro-cse-when" data-marble-editable>June 2022 - October 2022</span>
+        </div>
+        <div class="row" data-marble-id="pro-cse-2">
+          <span data-marble-id="pro-cse-role" data-marble-editable>Undergraduate Research Assistant</span>
+          <span class="r" data-marble-id="pro-cse-where" data-marble-editable>La Jolla, CA</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="sec-block" data-marble-id="blk-hon" aria-label="Honors and Awards">
+    <!-- ================= HONORS ================= -->
+
+    <div class="head-row" data-marble-id="hr-s-hon">
+      <button class="add" data-marble-id="add-hon" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="next">+</button>
+      <h2 class="sec" data-marble-id="s-hon" data-marble-editable>Honors and Awards</h2>
+    </div>
+
+    <div class="lines" data-marble-id="hon" data-marble-sortable="lines">
+      <div class="row" data-marble-id="hon-uist" data-marble-removable>
+        <span data-marble-id="hon-uist-l" data-marble-editable>Best Demo Honorable Mention Award (UIST 2023)</span>
+        <span class="r" data-marble-id="hon-uist-r" data-marble-editable>2023</span>
+      </div>
+      <div class="row" data-marble-id="hon-sdh" data-marble-removable>
+        <span data-marble-id="hon-sdh-l" data-marble-editable>SD Hacks Winner (UC San Diego)</span>
+        <span class="r" data-marble-id="hon-sdh-r" data-marble-editable>2022</span>
+      </div>
+    </div>
+  </section>
+  <section class="sec-block" data-marble-id="blk-tea" aria-label="Teaching">
+    <!-- ================= TEACHING ================= -->
+
+    <div class="head-row" data-marble-id="hr-s-tea">
+      <button class="add" data-marble-id="add-tea" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="next">+</button>
+      <h2 class="sec" data-marble-id="s-tea" data-marble-editable>Teaching</h2>
+    </div>
+
+    <div class="lines" data-marble-id="tea" data-marble-sortable="lines">
+      <div class="row" data-marble-id="tea-1" data-marble-removable>
+        <span data-marble-id="tea-1-l" data-marble-editable>TA, COGS 10: Cognitive Consequences of Technology – Instructor: Jim Hollan</span>
+        <span class="r" data-marble-id="tea-1-r" data-marble-editable>Winter 2026</span>
+      </div>
+      <div class="row" data-marble-id="tea-2" data-marble-removable>
+        <span data-marble-id="tea-2-l" data-marble-editable>TA, COGS 10: Cognitive Consequences of Technology – Instructor: Amy R. Fox</span>
+        <span class="r" data-marble-id="tea-2-r" data-marble-editable>Fall 2025</span>
+      </div>
+      <div class="row" data-marble-id="tea-3" data-marble-removable>
+        <span data-marble-id="tea-3-l" data-marble-editable>TA, DSGN 2: Designing your Future Self – Instructor: Jim Hollan</span>
+        <span class="r" data-marble-id="tea-3-r" data-marble-editable>Spring 2025</span>
+      </div>
+      <div class="row" data-marble-id="tea-4" data-marble-removable>
+        <span data-marble-id="tea-4-l" data-marble-editable>TA, COGS 126: Thinking with Computers – Instructor: Jim Hollan</span>
+        <span class="r" data-marble-id="tea-4-r" data-marble-editable>Winter 2025</span>
+      </div>
+      <div class="row" data-marble-id="tea-5" data-marble-removable>
+        <span data-marble-id="tea-5-l" data-marble-editable>TA, DSGN 119: Design@Large Speaker Series – Instructor: Jim Hollan</span>
+        <span class="r" data-marble-id="tea-5-r" data-marble-editable>Spring 2024</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec-block" data-marble-id="blk-men" aria-label="Mentoring">
+    <!-- ================= MENTORING ================= -->
+
+    <div class="head-row" data-marble-id="hr-s-men">
+      <button class="add" data-marble-id="add-men" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="next">+</button>
+      <h2 class="sec" data-marble-id="s-men" data-marble-editable>Mentoring</h2>
+    </div>
+
+    <div class="lines" data-marble-id="men" data-marble-sortable="lines">
+      <div class="row" data-marble-id="men-1" data-marble-removable>
+        <span data-marble-id="men-1-l" data-marble-editable>Erin Law (UCSD B.S. in Cognitive Science)</span>
+        <span class="r" data-marble-id="men-1-r" data-marble-editable>2026 – Ongoing</span>
+      </div>
+      <div class="row" data-marble-id="men-2" data-marble-removable>
+        <span data-marble-id="men-2-l" data-marble-editable>Tony Li (UCSD B.S. in Mathematics-Computer Science)</span>
+        <span class="r" data-marble-id="men-2-r" data-marble-editable>2026 – Ongoing</span>
+      </div>
+      <div class="row" data-marble-id="men-3" data-marble-removable>
+        <span data-marble-id="men-3-l" data-marble-editable>Jordan Chen (UCSD B.S. in Mathematics-Computer Science)</span>
+        <span class="r" data-marble-id="men-3-r" data-marble-editable>2026 – Ongoing</span>
+      </div>
+      <div class="row" data-marble-id="men-4" data-marble-removable>
+        <span data-marble-id="men-4-l" data-marble-editable>Shamita Goyal (UCSD B.S. in Cognitive Science)</span>
+        <span class="r" data-marble-id="men-4-r" data-marble-editable>2025</span>
+      </div>
+      <div class="row" data-marble-id="men-5" data-marble-removable>
+        <span data-marble-id="men-5-l" data-marble-editable>Shubham Patil (UCSD B.S. in Computer Engineering) – Now Co-founder of Emergent Computing</span>
+        <span class="r" data-marble-id="men-5-r" data-marble-editable>2025</span>
+      </div>
+      <div class="row" data-marble-id="men-6" data-marble-removable>
+        <span data-marble-id="men-6-l" data-marble-editable>Vincent Hsieh (UCSD M.S. in Computer Science)</span>
+        <span class="r" data-marble-id="men-6-r" data-marble-editable>2025</span>
+      </div>
+      <div class="row" data-marble-id="men-7" data-marble-removable>
+        <span data-marble-id="men-7-l" data-marble-editable>Keshav Tiwari (UCSD B.S. in Cognitive Science) – Now MS Student at UC Berkeley</span>
+        <span class="r" data-marble-id="men-7-r" data-marble-editable>2024</span>
+      </div>
+      <div class="row" data-marble-id="men-8" data-marble-removable>
+        <span data-marble-id="men-8-l" data-marble-editable>Allen Chen (UCSD B.S. in Cognitive Science) – Now MHCI Student at CMU</span>
+        <span class="r" data-marble-id="men-8-r" data-marble-editable>2024</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec-block" data-marble-id="blk-tal" aria-label="Invited Talks">
+    <!-- ================= INVITED TALKS ================= -->
+
+    <div class="head-row" data-marble-id="hr-s-tal">
+      <button class="add" data-marble-id="add-tal" type="button" data-cv-form="talk" data-marble-add="#tpl-talk" data-marble-into="next">+</button>
+      <h2 class="sec" data-marble-id="s-tal" data-marble-editable>Invited Talks</h2>
+    </div>
+
+    <div data-marble-id="tal" data-marble-sortable="talks">
+
+      <div class="entry" data-marble-id="tal-1" data-marble-removable>
+        <div class="row" data-marble-id="tal-1-1">
+          <span class="org" data-marble-id="tal-1-org" data-marble-editable>Dynamic Abstractions Reading Group</span>
+          <span class="r" data-marble-id="tal-1-when" data-marble-editable>February 2026</span>
+        </div>
+        <div class="talk" data-marble-id="tal-1-t" data-marble-editable>What is Malleable Software Now?</div>
+      </div>
+
+      <div class="entry" data-marble-id="tal-2" data-marble-removable>
+        <div class="row" data-marble-id="tal-2-1">
+          <span class="org" data-marble-id="tal-2-org" data-marble-editable>CHI 2025 Workshop on Tools for Thought, Selected Lightning Talk</span>
+          <span class="r" data-marble-id="tal-2-when" data-marble-editable>April 2025</span>
+        </div>
+        <div class="talk" data-marble-id="tal-2-t" data-marble-editable>Feedforward for GenAI: Opportunities for a Design Space</div>
+      </div>
+
+      <div class="entry" data-marble-id="tal-3" data-marble-removable>
+        <div class="row" data-marble-id="tal-3-1">
+          <span class="org" data-marble-id="tal-3-org" data-marble-editable>Cognitive Science Student Association 2024 Conference</span>
+          <span class="r" data-marble-id="tal-3-when" data-marble-editable>May 2024</span>
+        </div>
+        <div class="talk" data-marble-id="tal-3-t" data-marble-editable>Towards Malleable and Proactive Information Spaces with Generative AI</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="sec-block" data-marble-id="blk-ser" aria-label="Service">
+    <!-- ================= SERVICE ================= -->
+
+    <div class="head-row" data-marble-id="hr-s-ser">
+      <button class="add" data-marble-id="add-ser" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="next">+</button>
+      <h2 class="sec" data-marble-id="s-ser" data-marble-editable>Service</h2>
+    </div>
+
+    <div class="lines" data-marble-id="ser" data-marble-sortable="lines">
+      <div class="row" data-marble-id="ser-1" data-marble-removable>
+        <span data-marble-id="ser-1-l" data-marble-editable>Design Lab Research Meeting Organizer</span>
+        <span class="r" data-marble-id="ser-1-r" data-marble-editable>2024 - 2025</span>
+      </div>
+      <div class="row" data-marble-id="ser-2" data-marble-removable>
+        <span data-marble-id="ser-2-l" data-marble-editable>Reviewer (CHI 2024-2026, UIST 2024-2026 – 6x Special Recognition for Outstanding Reviews)</span>
+        <span class="r" data-marble-id="ser-2-r" data-marble-editable></span>
+      </div>
+    </div>
+  </section>
+
+
+
+    <section class="sec-block" data-marble-id="blk-ski" aria-label="Skills">
+    <!-- ================= SKILLS ================= -->
+
+    <div class="head-row" data-marble-id="hr-s-ski">
+      <button class="add" data-marble-id="add-ski" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="next">+</button>
+      <h2 class="sec" data-marble-id="s-ski" data-marble-editable>Skills</h2>
+    </div>
+
+    <div class="lines" data-marble-id="ski" data-marble-sortable="lines">
+      <div class="row" data-marble-id="ski-1" data-marble-removable>
+        <span data-marble-id="ski-1-l" data-marble-editable>Coding Languages: JavaScript/TypeScript, HTML, CSS, SQL, Python, Swift, Java, C/C++</span>
+        <span class="r" data-marble-id="ski-1-r" data-marble-editable></span>
+      </div>
+    </div>
+  </section>
   </div>
-
-  <!-- ================= PUBLICATIONS ================= -->
-
-  <h2 class="sec" data-marble-id="s-pub" data-marble-editable>Publications</h2>
-
-  <h3 class="sub" data-marble-id="h-conf" data-marble-editable>Conference Papers</h3>
-  <div data-marble-id="conf" data-marble-sortable="pubs">
-
-    <div class="pub" data-marble-id="c7" data-marble-removable>
-      <div class="key" data-marble-id="c7-k" data-marble-editable>2026 [C7]</div>
-      <div class="body" data-marble-id="c7-b">
-        <p class="title" data-marble-id="c7-t" data-marble-editable>Maru: Information Architecture as a Shared Language for Generating Aligned and Persistent User Interfaces</p>
-        <p class="authors" data-marble-id="c7-a"><span data-marble-id="c7-a1" data-marble-editable>Eunhye Kim, DaEun Choi, </span><strong data-marble-id="c7-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c7-a2" data-marble-editable>, Hyunjung Yi, Yue Jiang, Juho Kim</span></p>
-        <p class="venue" data-marble-id="c7-v" data-marble-editable>UIST 2026: Proceedings of the 2025 ACM Symposium on User Interface Software and Technology</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="c6" data-marble-removable>
-      <div class="key" data-marble-id="c6-k" data-marble-editable>2026 [C6]</div>
-      <div class="body" data-marble-id="c6-b">
-        <p class="title" data-marble-id="c6-t" data-marble-editable>ChoiceMates: Supporting Unfamiliar Online Decision-Making with Multi-Agent Conversational Interactions</p>
-        <p class="authors" data-marble-id="c6-a"><span data-marble-id="c6-a1" data-marble-editable>Jeongeon Park, </span><strong data-marble-id="c6-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c6-a2" data-marble-editable>, Kihoon Son, Jean Y. Song, Xiaojuan Ma, Juho Kim</span></p>
-        <p class="venue" data-marble-id="c6-v" data-marble-editable>IUI 2026: Proceedings of the 2026 ACM Conference on Intelligent User Interfaces</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="c5" data-marble-removable>
-      <div class="key" data-marble-id="c5-k" data-marble-editable>2025 [C5]</div>
-      <div class="body" data-marble-id="c5-b">
-        <p class="title" data-marble-id="c5-t" data-marble-editable>Meridian: A Design Framework for Malleable Overview-Detail Interfaces</p>
-        <p class="authors" data-marble-id="c5-a"><strong data-marble-id="c5-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c5-a2" data-marble-editable> and Haijun Xia</span></p>
-        <p class="venue" data-marble-id="c5-v" data-marble-editable>UIST 2025: Proceedings of the 2025 ACM Symposium on User Interface Software and Technology</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="c4" data-marble-removable>
-      <div class="key" data-marble-id="c4-k" data-marble-editable>2025 [C4]</div>
-      <div class="body" data-marble-id="c4-b">
-        <p class="title" data-marble-id="c4-t" data-marble-editable>Lessons from Designing a Course and Platform for Teaching Qualitative Analysis Experientially in a Large Course-Based Community Consultancy</p>
-        <p class="authors" data-marble-id="c4-a"><span data-marble-id="c4-a1" data-marble-editable>Dustin Palea, Elijah Kirby, Madison Gruender, </span><strong data-marble-id="c4-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c4-a2" data-marble-editable>, Jessalyn Wang, David T. Lee</span></p>
-        <p class="venue" data-marble-id="c4-v" data-marble-editable>ICER 2025: Proceedings of the ACM Conference on International Computing Education Research</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="c3" data-marble-removable>
-      <div class="key" data-marble-id="c3-k" data-marble-editable>2025 [C3]</div>
-      <div class="body" data-marble-id="c3-b">
-        <p class="title" data-marble-id="c3-t" data-marble-editable>Malleable Overview-Detail Interfaces</p>
-        <p class="authors" data-marble-id="c3-a"><strong data-marble-id="c3-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c3-a2" data-marble-editable>, Allen Chen, Yining Cao, Haijun Xia</span></p>
-        <p class="venue" data-marble-id="c3-v" data-marble-editable>CHI 2025: Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="c2" data-marble-removable>
-      <div class="key" data-marble-id="c2-k" data-marble-editable>2024 [C2]</div>
-      <div class="body" data-marble-id="c2-b">
-        <p class="title" data-marble-id="c2-t" data-marble-editable>Luminate: Structured Generation and Exploration of Design Space with Large Language Models for Human-AI Co-Creation</p>
-        <p class="authors" data-marble-id="c2-a"><span data-marble-id="c2-a1" data-marble-editable>Sangho Suh, Meng Chen, </span><strong data-marble-id="c2-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c2-a2" data-marble-editable>, Toby Jia-Jun Li, Haijun Xia</span></p>
-        <p class="venue" data-marble-id="c2-v" data-marble-editable>CHI 2024: Proceedings of the 2024 CHI Conference on Human Factors in Computing Systems</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="c1" data-marble-removable>
-      <div class="key" data-marble-id="c1-k" data-marble-editable>2023 [C1]</div>
-      <div class="body" data-marble-id="c1-b">
-        <p class="title" data-marble-id="c1-t" data-marble-editable>Sensecape: Enabling Multilevel Exploration and Sensemaking with Large Language Models</p>
-        <p class="authors" data-marble-id="c1-a"><span data-marble-id="c1-a1" data-marble-editable>Sangho Suh, </span><strong data-marble-id="c1-me" data-marble-editable>Bryan Min</strong><span data-marble-id="c1-a2" data-marble-editable>, Srishti Palani, Haijun Xia</span></p>
-        <p class="venue" data-marble-id="c1-v" data-marble-editable>UIST 2023: Proceedings of the 2023 ACM Symposium on User Interface Software and Technology</p>
-      </div>
-    </div>
-
-  </div>
-  <button class="add" data-marble-id="add-conf" type="button" data-cv-form="pub" data-marble-add="#tpl-pub" data-marble-into="prev" data-cv-prefix="C">+ paper</button>
-
-  <h3 class="sub" data-marble-id="h-pre" data-marble-editable>Preprints</h3>
-  <div data-marble-id="pre" data-marble-sortable="pubs">
-
-    <div class="pub" data-marble-id="r2" data-marble-removable>
-      <div class="key" data-marble-id="r2-k" data-marble-editable>2026 [R2]</div>
-      <div class="body" data-marble-id="r2-b">
-        <p class="title" data-marble-id="r2-t" data-marble-editable>Making Abstraction Concrete: A Design Space and Interaction Model of Abstraction in Interactive Systems</p>
-        <p class="authors" data-marble-id="r2-a"><strong data-marble-id="r2-me" data-marble-editable>Bryan Min</strong><span data-marble-id="r2-a2" data-marble-editable>, Sangho Suh, Jim Hollan, Haijun Xia</span></p>
-        <p class="venue" data-marble-id="r2-v" data-marble-editable>May 2026 - arXiv:2605.11344</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="r1" data-marble-removable>
-      <div class="key" data-marble-id="r1-k" data-marble-editable>2026 [R1]</div>
-      <div class="body" data-marble-id="r1-b">
-        <p class="title" data-marble-id="r1-t" data-marble-editable>Gradual Generation of User Interfaces as a Design Method for Malleable Software</p>
-        <p class="authors" data-marble-id="r1-a"><strong data-marble-id="r1-me" data-marble-editable>Bryan Min</strong><span data-marble-id="r1-a2" data-marble-editable>, Peiling Jiang, Zhicheng Huang, Haijun Xia</span></p>
-        <p class="venue" data-marble-id="r1-v" data-marble-editable>January 2026 - arXiv:2601.17975</p>
-      </div>
-    </div>
-
-  </div>
-  <button class="add" data-marble-id="add-pre" type="button" data-cv-form="pub" data-marble-add="#tpl-pub" data-marble-into="prev" data-cv-prefix="R">+ preprint</button>
-
-  <h3 class="sub" data-marble-id="h-pos" data-marble-editable>Posters, Demos, Workshop Papers</h3>
-  <div data-marble-id="pos" data-marble-sortable="pubs">
-
-    <div class="pub" data-marble-id="p7" data-marble-removable>
-      <div class="key" data-marble-id="p7-k" data-marble-editable>2026 [P7]</div>
-      <div class="body" data-marble-id="p7-b">
-        <p class="title" data-marble-id="p7-t" data-marble-editable>Jacaranda: Grafting User-Editable Web Experiences Across Sites</p>
-        <p class="authors" data-marble-id="p7-a"><span data-marble-id="p7-a1" data-marble-editable>Xinqi Zhang, Mingyuan Zhong, Longjie Guo, </span><strong data-marble-id="p7-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p7-a2" data-marble-editable>, Yuanhao Zhang, Kai Lukoff</span></p>
-        <p class="venue" data-marble-id="p7-v" data-marble-editable>UIST 2026 Posters</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="p6" data-marble-removable>
-      <div class="key" data-marble-id="p6-k" data-marble-editable>2026 [P6]</div>
-      <div class="body" data-marble-id="p6-b">
-        <p class="title" data-marble-id="p6-t" data-marble-editable>Generative UI Alone Won’t Make Software Malleable</p>
-        <p class="authors" data-marble-id="p6-a"><strong data-marble-id="p6-me" data-marble-editable>Bryan Min</strong></p>
-        <p class="venue" data-marble-id="p6-v" data-marble-editable>CHI 2025 Workshop on HCI for GenUI</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="p5" data-marble-removable>
-      <div class="key" data-marble-id="p5-k" data-marble-editable>2026 [P5]</div>
-      <div class="body" data-marble-id="p5-b">
-        <p class="title" data-marble-id="p5-t" data-marble-editable>User-Constructed Information Architecture as a Persistence Layer for GenUI</p>
-        <p class="authors" data-marble-id="p5-a"><span data-marble-id="p5-a1" data-marble-editable>Eunhye Kim, Hyunjung Yi, Daeun Choi, </span><strong data-marble-id="p5-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p5-a2" data-marble-editable>, Yue Jiang, Juho Kim</span></p>
-        <p class="venue" data-marble-id="p5-v" data-marble-editable>CHI 2025 Workshop on HCI for GenUI</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="p4" data-marble-removable>
-      <div class="key" data-marble-id="p4-k" data-marble-editable>2026 [P4]</div>
-      <div class="body" data-marble-id="p4-b">
-        <p class="title" data-marble-id="p4-t" data-marble-editable>User Agency in Runtime Malleable Software Under Change Aversion</p>
-        <p class="authors" data-marble-id="p4-a"><span data-marble-id="p4-a1" data-marble-editable>Xinqi Zhang, </span><strong data-marble-id="p4-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p4-a2" data-marble-editable>, Shizhao L. Liu, Kai Lukoff</span></p>
-        <p class="venue" data-marble-id="p4-v" data-marble-editable>CHI 2025 Workshop on HCI for GenUI</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="p3" data-marble-removable>
-      <div class="key" data-marble-id="p3-k" data-marble-editable>2025 [P3]</div>
-      <div class="body" data-marble-id="p3-b">
-        <p class="title" data-marble-id="p3-t" data-marble-editable>Feedforward in Generative AI: Opportunities for a Design Space</p>
-        <p class="authors" data-marble-id="p3-a"><strong data-marble-id="p3-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p3-a2" data-marble-editable> and Haijun Xia</span></p>
-        <p class="venue" data-marble-id="p3-v" data-marble-editable>CHI 2025 Workshop on Tools for Thought</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="p2" data-marble-removable>
-      <div class="key" data-marble-id="p2-k" data-marble-editable>2024 [P2]</div>
-      <div class="body" data-marble-id="p2-b">
-        <p class="title" data-marble-id="p2-t" data-marble-editable>How do multiple LLM-powered conversational agents assist sensemaking and decision-making in an unfamiliar domain?</p>
-        <p class="authors" data-marble-id="p2-a"><span data-marble-id="p2-a1" data-marble-editable>Jeongeon Park, </span><strong data-marble-id="p2-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p2-a2" data-marble-editable>, Jean Y. Song, Xiaojuan Ma, Juho Kim</span></p>
-        <p class="venue" data-marble-id="p2-v" data-marble-editable>CHI 2024 Sensemaking Workshop</p>
-      </div>
-    </div>
-
-    <div class="pub" data-marble-id="p1" data-marble-removable>
-      <div class="key" data-marble-id="p1-k" data-marble-editable>2023 [P1]</div>
-      <div class="body" data-marble-id="p1-b">
-        <p class="title" data-marble-id="p1-t" data-marble-editable>Demonstration of Masonview: Content-Driven Viewport Management</p>
-        <p class="authors" data-marble-id="p1-a"><strong data-marble-id="p1-me" data-marble-editable>Bryan Min</strong><span data-marble-id="p1-a2" data-marble-editable>, Matthew T. Beaudouin-Lafon, Sangho Suh, Haijun Xia</span></p>
-        <p class="venue" data-marble-id="p1-v" data-marble-editable>UIST 2023 Demos</p>
-        <p class="award" data-marble-id="p1-w" data-marble-editable>🏅Best Demo Honorable Mention Award</p>
-      </div>
-    </div>
-
-  </div>
-  <button class="add" data-marble-id="add-pos" type="button" data-cv-form="pub" data-marble-add="#tpl-pub" data-marble-into="prev" data-cv-prefix="P">+ poster</button>
-
-  <h3 class="sub" data-marble-id="h-pat" data-marble-editable>Patents</h3>
-  <div data-marble-id="pat" data-marble-sortable="pubs">
-
-    <div class="pub" data-marble-id="a1" data-marble-removable>
-      <div class="key" data-marble-id="a1-k" data-marble-editable>2026 [A1]</div>
-      <div class="body" data-marble-id="a1-b">
-        <p class="title" data-marble-id="a1-t" data-marble-editable>Methods and systems for generating malleable overview-detail user interfaces</p>
-        <p class="authors" data-marble-id="a1-a"><span data-marble-id="a1-a1" data-marble-editable>Haijun Xia and </span><strong data-marble-id="a1-me" data-marble-editable>Bryan Min</strong></p>
-        <p class="venue" data-marble-id="a1-v" data-marble-editable>US Patent App. 19/376,807</p>
-      </div>
-    </div>
-
-  </div>
-  <button class="add" data-marble-id="add-pat" type="button" data-cv-form="pub" data-marble-add="#tpl-pub" data-marble-into="prev" data-cv-prefix="A">+ patent</button>
-
-  <!-- ================= RESEARCH EXPERIENCE ================= -->
-
-  <h2 class="sec" data-marble-id="s-res" data-marble-editable>Research Experience</h2>
-
-  <div data-marble-id="res" data-marble-sortable="exp">
-
-    <div class="entry" data-marble-id="res-msft" data-marble-removable>
-      <div class="row" data-marble-id="res-msft-1">
-        <span class="org" data-marble-id="res-msft-org" data-marble-editable>FX and EPIC Research Group, Microsoft</span>
-        <span class="r" data-marble-id="res-msft-when" data-marble-editable>May 2026 – Current</span>
-      </div>
-      <div class="row" data-marble-id="res-msft-2">
-        <span data-marble-id="res-msft-role" data-marble-editable>Research Intern</span>
-        <span class="r" data-marble-id="res-msft-where" data-marble-editable>Redmond, WA</span>
-      </div>
-      <div data-marble-id="res-msft-sup" data-marble-editable>Supervisor: Nic Marquardt</div>
-    </div>
-
-    <div class="entry" data-marble-id="res-fil2" data-marble-removable>
-      <div class="row" data-marble-id="res-fil2-1">
-        <span class="org" data-marble-id="res-fil2-org" data-marble-editable>Foundation Interface Lab, UC San Diego</span>
-        <span class="r" data-marble-id="res-fil2-when" data-marble-editable>September 2023 - September 2024</span>
-      </div>
-      <div class="row" data-marble-id="res-fil2-2">
-        <span data-marble-id="res-fil2-role" data-marble-editable>Researcher</span>
-        <span class="r" data-marble-id="res-fil2-where" data-marble-editable>La Jolla, CA</span>
-      </div>
-      <div data-marble-id="res-fil2-sup" data-marble-editable>Supervisor: Haijun Xia [C3]</div>
-    </div>
-
-    <div class="entry" data-marble-id="res-kix" data-marble-removable>
-      <div class="row" data-marble-id="res-kix-1">
-        <span class="org" data-marble-id="res-kix-org" data-marble-editable>KIXLAB, KAIST</span>
-        <span class="r" data-marble-id="res-kix-when" data-marble-editable>July 2023 - September 2023</span>
-      </div>
-      <div class="row" data-marble-id="res-kix-2">
-        <span data-marble-id="res-kix-role" data-marble-editable>Undergraduate Research Intern</span>
-        <span class="r" data-marble-id="res-kix-where" data-marble-editable>Daejeon, South Korea</span>
-      </div>
-      <div data-marble-id="res-kix-sup" data-marble-editable>Supervisor: Juho Kim [P2]</div>
-    </div>
-
-    <div class="entry" data-marble-id="res-fil1" data-marble-removable>
-      <div class="row" data-marble-id="res-fil1-1">
-        <span class="org" data-marble-id="res-fil1-org" data-marble-editable>Foundation Interface Lab, UC San Diego</span>
-        <span class="r" data-marble-id="res-fil1-when" data-marble-editable>November 2022 - June 2023</span>
-      </div>
-      <div class="row" data-marble-id="res-fil1-2">
-        <span data-marble-id="res-fil1-role" data-marble-editable>Undergraduate Researcher</span>
-        <span class="r" data-marble-id="res-fil1-where" data-marble-editable>La Jolla, CA</span>
-      </div>
-      <div data-marble-id="res-fil1-sup" data-marble-editable>Supervisor: Haijun Xia [C1, C2, P1]</div>
-    </div>
-
-    <div class="entry" data-marble-id="res-t4g" data-marble-removable>
-      <div class="row" data-marble-id="res-t4g-1">
-        <span class="org" data-marble-id="res-t4g-org" data-marble-editable>Tech4Good Lab, UC Santa Cruz</span>
-        <span class="r" data-marble-id="res-t4g-when" data-marble-editable>January 2021 - January 2023</span>
-      </div>
-      <div class="row" data-marble-id="res-t4g-2">
-        <span data-marble-id="res-t4g-role" data-marble-editable>Undergraduate Researcher</span>
-        <span class="r" data-marble-id="res-t4g-where" data-marble-editable>Santa Cruz, CA</span>
-      </div>
-      <div data-marble-id="res-t4g-sup" data-marble-editable>Supervisor: David T. Lee [C4]</div>
-    </div>
-
-  </div>
-  <button class="add" data-marble-id="add-res" type="button" data-cv-form="exp" data-marble-add="#tpl-exp" data-marble-into="prev">+ position</button>
-
-  <!-- ================= PROFESSIONAL EXPERIENCE ================= -->
-
-  <h2 class="sec" data-marble-id="s-pro" data-marble-editable>Professional Experience</h2>
-
-  <div data-marble-id="pro" data-marble-sortable="exp">
-
-    <div class="entry" data-marble-id="pro-comm" data-marble-removable>
-      <div class="row" data-marble-id="pro-comm-1">
-        <span class="org" data-marble-id="pro-comm-org" data-marble-editable>Communications Department, UC San Diego</span>
-        <span class="r" data-marble-id="pro-comm-when" data-marble-editable>October 2022 - July 2023</span>
-      </div>
-      <div class="row" data-marble-id="pro-comm-2">
-        <span data-marble-id="pro-comm-role" data-marble-editable>Data Visualization Developer</span>
-        <span class="r" data-marble-id="pro-comm-where" data-marble-editable>La Jolla, CA</span>
-      </div>
-    </div>
-
-    <div class="entry" data-marble-id="pro-att" data-marble-removable>
-      <div class="row" data-marble-id="pro-att-1">
-        <span class="org" data-marble-id="pro-att-org" data-marble-editable>AT&amp;T</span>
-        <span class="r" data-marble-id="pro-att-when" data-marble-editable>June 2022 - September 2022</span>
-      </div>
-      <div class="row" data-marble-id="pro-att-2">
-        <span data-marble-id="pro-att-role" data-marble-editable>Software Engineer Intern</span>
-        <span class="r" data-marble-id="pro-att-where" data-marble-editable>Chicago, IL</span>
-      </div>
-    </div>
-
-    <div class="entry" data-marble-id="pro-cse" data-marble-removable>
-      <div class="row" data-marble-id="pro-cse-1">
-        <span class="org" data-marble-id="pro-cse-org" data-marble-editable>CSE Department, UC San Diego</span>
-        <span class="r" data-marble-id="pro-cse-when" data-marble-editable>June 2022 - October 2022</span>
-      </div>
-      <div class="row" data-marble-id="pro-cse-2">
-        <span data-marble-id="pro-cse-role" data-marble-editable>Undergraduate Research Assistant</span>
-        <span class="r" data-marble-id="pro-cse-where" data-marble-editable>La Jolla, CA</span>
-      </div>
-    </div>
-
-  </div>
-  <button class="add" data-marble-id="add-pro" type="button" data-cv-form="exp" data-marble-add="#tpl-exp" data-marble-into="prev">+ position</button>
-
-  <!-- ================= HONORS ================= -->
-
-  <h2 class="sec" data-marble-id="s-hon" data-marble-editable>Honors and Awards</h2>
-
-  <div class="lines" data-marble-id="hon" data-marble-sortable="lines">
-    <div class="row" data-marble-id="hon-uist" data-marble-removable>
-      <span data-marble-id="hon-uist-l" data-marble-editable>Best Demo Honorable Mention Award (UIST 2023)</span>
-      <span class="r" data-marble-id="hon-uist-r" data-marble-editable>2023</span>
-    </div>
-    <div class="row" data-marble-id="hon-sdh" data-marble-removable>
-      <span data-marble-id="hon-sdh-l" data-marble-editable>SD Hacks Winner (UC San Diego)</span>
-      <span class="r" data-marble-id="hon-sdh-r" data-marble-editable>2022</span>
-    </div>
-  </div>
-  <button class="add" data-marble-id="add-hon" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="prev">+ award</button>
-
-  <!-- ================= TEACHING ================= -->
-
-  <h2 class="sec" data-marble-id="s-tea" data-marble-editable>Teaching</h2>
-
-  <div class="lines" data-marble-id="tea" data-marble-sortable="lines">
-    <div class="row" data-marble-id="tea-1" data-marble-removable>
-      <span data-marble-id="tea-1-l" data-marble-editable>TA, COGS 10: Cognitive Consequences of Technology – Instructor: Jim Hollan</span>
-      <span class="r" data-marble-id="tea-1-r" data-marble-editable>Winter 2026</span>
-    </div>
-    <div class="row" data-marble-id="tea-2" data-marble-removable>
-      <span data-marble-id="tea-2-l" data-marble-editable>TA, COGS 10: Cognitive Consequences of Technology – Instructor: Amy R. Fox</span>
-      <span class="r" data-marble-id="tea-2-r" data-marble-editable>Fall 2025</span>
-    </div>
-    <div class="row" data-marble-id="tea-3" data-marble-removable>
-      <span data-marble-id="tea-3-l" data-marble-editable>TA, DSGN 2: Designing your Future Self – Instructor: Jim Hollan</span>
-      <span class="r" data-marble-id="tea-3-r" data-marble-editable>Spring 2025</span>
-    </div>
-    <div class="row" data-marble-id="tea-4" data-marble-removable>
-      <span data-marble-id="tea-4-l" data-marble-editable>TA, COGS 126: Thinking with Computers – Instructor: Jim Hollan</span>
-      <span class="r" data-marble-id="tea-4-r" data-marble-editable>Winter 2025</span>
-    </div>
-    <div class="row" data-marble-id="tea-5" data-marble-removable>
-      <span data-marble-id="tea-5-l" data-marble-editable>TA, DSGN 119: Design@Large Speaker Series – Instructor: Jim Hollan</span>
-      <span class="r" data-marble-id="tea-5-r" data-marble-editable>Spring 2024</span>
-    </div>
-  </div>
-  <button class="add" data-marble-id="add-tea" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="prev">+ course</button>
-
-  <!-- ================= MENTORING ================= -->
-
-  <h2 class="sec" data-marble-id="s-men" data-marble-editable>Mentoring</h2>
-
-  <div class="lines" data-marble-id="men" data-marble-sortable="lines">
-    <div class="row" data-marble-id="men-1" data-marble-removable>
-      <span data-marble-id="men-1-l" data-marble-editable>Erin Law (UCSD B.S. in Cognitive Science)</span>
-      <span class="r" data-marble-id="men-1-r" data-marble-editable>2026 – Ongoing</span>
-    </div>
-    <div class="row" data-marble-id="men-2" data-marble-removable>
-      <span data-marble-id="men-2-l" data-marble-editable>Tony Li (UCSD B.S. in Mathematics-Computer Science)</span>
-      <span class="r" data-marble-id="men-2-r" data-marble-editable>2026 – Ongoing</span>
-    </div>
-    <div class="row" data-marble-id="men-3" data-marble-removable>
-      <span data-marble-id="men-3-l" data-marble-editable>Jordan Chen (UCSD B.S. in Mathematics-Computer Science)</span>
-      <span class="r" data-marble-id="men-3-r" data-marble-editable>2026 – Ongoing</span>
-    </div>
-    <div class="row" data-marble-id="men-4" data-marble-removable>
-      <span data-marble-id="men-4-l" data-marble-editable>Shamita Goyal (UCSD B.S. in Cognitive Science)</span>
-      <span class="r" data-marble-id="men-4-r" data-marble-editable>2025</span>
-    </div>
-    <div class="row" data-marble-id="men-5" data-marble-removable>
-      <span data-marble-id="men-5-l" data-marble-editable>Shubham Patil (UCSD B.S. in Computer Engineering) – Now Co-founder of Emergent Computing</span>
-      <span class="r" data-marble-id="men-5-r" data-marble-editable>2025</span>
-    </div>
-    <div class="row" data-marble-id="men-6" data-marble-removable>
-      <span data-marble-id="men-6-l" data-marble-editable>Vincent Hsieh (UCSD M.S. in Computer Science)</span>
-      <span class="r" data-marble-id="men-6-r" data-marble-editable>2025</span>
-    </div>
-    <div class="row" data-marble-id="men-7" data-marble-removable>
-      <span data-marble-id="men-7-l" data-marble-editable>Keshav Tiwari (UCSD B.S. in Cognitive Science) – Now MS Student at UC Berkeley</span>
-      <span class="r" data-marble-id="men-7-r" data-marble-editable>2024</span>
-    </div>
-    <div class="row" data-marble-id="men-8" data-marble-removable>
-      <span data-marble-id="men-8-l" data-marble-editable>Allen Chen (UCSD B.S. in Cognitive Science) – Now MHCI Student at CMU</span>
-      <span class="r" data-marble-id="men-8-r" data-marble-editable>2024</span>
-    </div>
-  </div>
-  <button class="add" data-marble-id="add-men" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="prev">+ mentee</button>
-
-  <!-- ================= INVITED TALKS ================= -->
-
-  <h2 class="sec" data-marble-id="s-tal" data-marble-editable>Invited Talks</h2>
-
-  <div data-marble-id="tal" data-marble-sortable="talks">
-
-    <div class="entry" data-marble-id="tal-1" data-marble-removable>
-      <div class="row" data-marble-id="tal-1-1">
-        <span class="org" data-marble-id="tal-1-org" data-marble-editable>Dynamic Abstractions Reading Group</span>
-        <span class="r" data-marble-id="tal-1-when" data-marble-editable>February 2026</span>
-      </div>
-      <div class="talk" data-marble-id="tal-1-t" data-marble-editable>What is Malleable Software Now?</div>
-    </div>
-
-    <div class="entry" data-marble-id="tal-2" data-marble-removable>
-      <div class="row" data-marble-id="tal-2-1">
-        <span class="org" data-marble-id="tal-2-org" data-marble-editable>CHI 2025 Workshop on Tools for Thought, Selected Lightning Talk</span>
-        <span class="r" data-marble-id="tal-2-when" data-marble-editable>April 2025</span>
-      </div>
-      <div class="talk" data-marble-id="tal-2-t" data-marble-editable>Feedforward for GenAI: Opportunities for a Design Space</div>
-    </div>
-
-    <div class="entry" data-marble-id="tal-3" data-marble-removable>
-      <div class="row" data-marble-id="tal-3-1">
-        <span class="org" data-marble-id="tal-3-org" data-marble-editable>Cognitive Science Student Association 2024 Conference</span>
-        <span class="r" data-marble-id="tal-3-when" data-marble-editable>May 2024</span>
-      </div>
-      <div class="talk" data-marble-id="tal-3-t" data-marble-editable>Towards Malleable and Proactive Information Spaces with Generative AI</div>
-    </div>
-
-  </div>
-  <button class="add" data-marble-id="add-tal" type="button" data-cv-form="talk" data-marble-add="#tpl-talk" data-marble-into="prev">+ talk</button>
-
-  <!-- ================= SERVICE ================= -->
-
-  <h2 class="sec" data-marble-id="s-ser" data-marble-editable>Service</h2>
-
-  <div class="lines" data-marble-id="ser" data-marble-sortable="lines">
-    <div class="row" data-marble-id="ser-1" data-marble-removable>
-      <span data-marble-id="ser-1-l" data-marble-editable>Design Lab Research Meeting Organizer</span>
-      <span class="r" data-marble-id="ser-1-r" data-marble-editable>2024 - 2025</span>
-    </div>
-    <div class="row" data-marble-id="ser-2" data-marble-removable>
-      <span data-marble-id="ser-2-l" data-marble-editable>Reviewer (CHI 2024-2026, UIST 2024-2026 – 6x Special Recognition for Outstanding Reviews)</span>
-      <span class="r" data-marble-id="ser-2-r" data-marble-editable></span>
-    </div>
-  </div>
-  <button class="add" data-marble-id="add-ser" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="prev">+ service</button>
-
-  <!-- ================= SKILLS ================= -->
-
-  <h2 class="sec" data-marble-id="s-ski" data-marble-editable>Skills</h2>
-
-  <div class="lines" data-marble-id="ski" data-marble-sortable="lines">
-    <div class="row" data-marble-id="ski-1" data-marble-removable>
-      <span data-marble-id="ski-1-l" data-marble-editable>Coding Languages: JavaScript/TypeScript, HTML, CSS, SQL, Python, Swift, Java, C/C++</span>
-      <span class="r" data-marble-id="ski-1-r" data-marble-editable></span>
-    </div>
-  </div>
-  <button class="add" data-marble-id="add-ski" type="button" data-cv-form="line" data-marble-add="#tpl-line" data-marble-into="prev">+ skill</button>
-
 </main>
 
 <!-- What the + buttons clone. Ids are minted at insert time, not copied. -->
@@ -813,19 +1001,31 @@
     css.push(`
       .marble-item { position: relative; }
       .marble-item.marble-dragging { opacity: .4; }
+      /* Margin furniture.
+         Laid out against the item's own left edge rather than a fixed offset,
+         so one row of controls ends the same distance from the text whatever
+         is holding it — and a grip with one button lines up with a grip with
+         two. Side by side, not stacked: stacking put the delete button down
+         beside the second line of whatever it deletes. */
+      .marble-item { position: relative; }
+      .marble-item.marble-dragging { opacity: .4; }
       .marble-grip {
-        position: absolute; left: -1.5rem; top: .1rem;
-        display: flex; flex-direction: column; gap: 2px;
+        position: absolute; left: var(--lane); top: 0;
+        display: flex; flex-direction: row; gap: 1px;
         opacity: 0; transition: opacity .12s ease;
       }
       .marble-item:hover > .marble-grip, .marble-grip:focus-within { opacity: 1; }
       .marble-btn {
-        width: 1.1rem; height: 1.1rem; padding: 0; border: 0; border-radius: 3px;
-        background: none; color: currentColor; opacity: .35;
-        font: 500 11px/1.1rem ui-monospace, SFMono-Regular, Menlo, monospace;
-        text-align: center; cursor: pointer;
+        display: grid; place-items: center;
+        width: 1rem; height: 1.15rem; padding: 0; border: 0; border-radius: 4px;
+        background: none; color: currentColor; opacity: .34;
+        font: 400 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+        cursor: pointer;
       }
       .marble-btn:hover { opacity: 1; background: rgba(127, 127, 127, .14); }
+      .marble-btn:focus-visible { opacity: 1; outline: 2px solid #5b8def; outline-offset: 1px; }
+      .marble-handle { font-size: 14px; }
+      .marble-remove { font-size: 15px; }
       @media print { .marble-grip { display: none !important; } }
     `);
 
@@ -1143,6 +1343,12 @@
     function wireComposers(root) {
       for (const button of within(root, '[data-cv-form]')) {
         if (!claim(button, 'composer')) continue;
+        // A bare "+" needs a name for anyone not looking at it. Taken from the
+        // heading beside it, so renaming the section renames the button.
+        const near = button.closest('.head-row')?.querySelector('h2, h3');
+        const label = `Add to ${marble.text(near) || 'this section'}`;
+        button.setAttribute('aria-label', label);
+        button.title = label;
         button.addEventListener('click', (event) => {
           event.stopPropagation();
           const wasMine = openForm?.dataset.owner === marble.id(button);
@@ -1157,8 +1363,14 @@
       // This document forks how it behaves — a form rather than a blank clone —
       // which is what the affordance template is for. The attributes stay the
       // standard ones so the markup still says plainly what the button does.
+      //
+      // "next" is the list after the heading this button sits beside, which is
+      // where the button lives now that it is out in the margin.
       const into = button.dataset.marbleInto;
-      const list = into === 'prev' ? button.previousElementSibling : document.querySelector(into);
+      const list =
+        into === 'next' ? button.closest('.head-row')?.nextElementSibling
+        : into === 'prev' ? button.previousElementSibling
+        : document.querySelector(into);
       const template = document.querySelector(button.dataset.marbleAdd);
       const kind = button.dataset.cvForm;
       const prefix = button.dataset.cvPrefix || '';
@@ -1173,9 +1385,13 @@
       form.setAttribute(TRANSIENT, '');
       form.dataset.owner = marble.id(button);
 
+      // The form is titled from the heading beside the button rather than from
+      // the button, which now says only "+". One name, in one place.
       const key = prefix ? nextKey(prefix) : '';
+      const heading = button.closest('.head-row')?.querySelector('h2, h3');
       form.innerHTML =
-        `<h4>${button.textContent.replace(/^\+\s*/, '')}${key ? ` &middot; <span class="cv-key">[${key}]</span>` : ''}</h4>`;
+        `<h4>${escapeHtml(marble.text(heading) || 'New entry')}` +
+        `${key ? ` &middot; <span class="cv-key">[${key}]</span>` : ''}</h4>`;
 
       const inputs = {};
       for (const field of fields) {
@@ -1381,36 +1597,198 @@
 // needs no host, no service and no second renderer.
 // Selected by class rather than id: data-marble-id is the carrier's addressing
 // key, not a DOM id, so getElementById would find nothing here.
-document.querySelector('.bar .print')?.addEventListener('click', () => window.print());
+document.querySelector('.rail .print')?.addEventListener('click', () => window.print());
 
-// The typeface picker. The attribute on the sheet is the fact; the control is a
-// view of it, so it writes the attribute and then reads it back rather than
-// keeping its own idea of what is selected. That is also why the file carries no
-// `selected` on any <option>: the answer lives in one place.
+// The section outline.
+//
+// Every row is drawn from a section that is already in the document, so the
+// rail holds no copy of the CV's structure — reading it wrong is not possible,
+// because there is nothing to read but the sections themselves. The rows are
+// transient: an overview of the file is not part of it.
+//
+// Dragging a row files exactly the move a drag in the page would. The outline
+// is a second way to reach the same operation, not a second place it lives.
+(() => {
+  const doc = document.querySelector('.doc');
+  const outline = document.querySelector('.outline');
+  if (!doc || !outline) return;
+
+  const sections = () => [...doc.querySelectorAll(':scope > .sec-block')];
+  const titleOf = (section) => section.querySelector('h2.sec')?.textContent?.trim() || 'Untitled';
+
+  let held = null;
+
+  function draw() {
+    outline.textContent = '';
+    for (const section of sections()) {
+      const row = document.createElement('li');
+      row.setAttribute('data-marble-transient', '');
+      row.draggable = true;
+      row.dataset.for = window.marble?.id(section) ?? '';
+      row.innerHTML = `<span class="dot">⠿</span><span class="oname"></span>`;
+      row.querySelector('.oname').textContent = titleOf(section);
+
+      row.addEventListener('click', () => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      row.addEventListener('dragstart', (event) => {
+        held = { row, section };
+        row.classList.add('marble-dragging');
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', row.dataset.for);
+      });
+      row.addEventListener('dragend', () => {
+        row.classList.remove('marble-dragging');
+        for (const l of outline.children) l.classList.remove('marble-over', 'marble-over-after');
+        held = null;
+      });
+      // Which half of the row you are over decides above or below it. Without
+      // that there is no gesture for "make this the last section", because
+      // there is no row after the last one to drop in front of.
+      const after = (event) => {
+        const box = row.getBoundingClientRect();
+        return event.clientY > box.top + box.height / 2;
+      };
+
+      row.addEventListener('dragover', (event) => {
+        if (!held || held.row === row) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+        for (const l of outline.children) l.classList.remove('marble-over', 'marble-over-after');
+        row.classList.add(after(event) ? 'marble-over-after' : 'marble-over');
+      });
+      row.addEventListener('drop', (event) => {
+        if (!held || held.row === row) return;
+        event.preventDefault();
+        move(held.section, after(event) ? section.nextElementSibling : section);
+      });
+
+      outline.append(row);
+    }
+  }
+
+  // Moving the section *is* the change; the op records it. The outline is then
+  // redrawn from where the sections actually ended up rather than from what the
+  // drag intended, so the two can never disagree.
+  function move(section, before) {
+    const id = window.marble?.id(section);
+    const parentId = window.marble?.id(doc);
+    if (!id || !parentId) { doc.insertBefore(section, before); draw(); return; }
+
+    const wasBefore = section.nextElementSibling;
+    doc.insertBefore(section, before);
+
+    const op = { type: 'move', id, parentId, beforeId: window.marble.id(before) };
+    const undo = {
+      type: 'move', id, parentId,
+      beforeId: wasBefore ? window.marble.id(wasBefore) : null,
+    };
+    window.marble.record({ redo: [op], undo: [undo] });
+    window.marble.op(op, { immediate: true });
+    draw();
+  }
+
+  draw();
+
+  // An overview is only worth having if it cannot disagree with the thing it
+  // overviews, so it is redrawn from whatever the sections currently say rather
+  // than from whatever last changed them. Watching the document catches every
+  // route in: a drag in the page, a heading typed over, an undo — which moves
+  // the DOM without going through register, and was how the two first drifted
+  // apart. Coalesced to a frame, because a rename fires this per keystroke.
+  let queued = false;
+  const schedule = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; draw(); });
+  };
+  new MutationObserver(schedule).observe(doc, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+
+  // And after a reconcile against the file, which replaces nodes wholesale.
+  window.marble
+    ? window.marble.register(schedule)
+    : addEventListener('marble:ready', (event) => event.detail.register(schedule), { once: true });
+})();
+
+// The typeface rail.
+//
+// One fact: data-font on the sheet. Hovering a swatch retypes the whole document
+// so you are previewing the CV rather than a specimen line — but a hover is not a
+// decision, so it only moves the page. Nothing is filed until you click, which is
+// the difference between trying a face on and choosing it.
+//
+// That works because the DOM is not the write path: marble.op is. Setting the
+// attribute changes what you see and nothing else, so a hundred mouseovers cost
+// the file nothing.
 (() => {
   const sheet = document.querySelector('.sheet');
-  const face = document.querySelector('.bar .face');
-  if (!sheet || !face) return;
+  const list = document.querySelector('.faces');
+  if (!sheet || !list) return;
 
   const DEFAULT = 'source';
-  const show = () => { face.value = sheet.getAttribute('data-font') || DEFAULT; };
+  const chosen = () => sheet.getAttribute('data-font') || DEFAULT;
 
-  face.addEventListener('change', () => {
-    const value = face.value;
-    const was = sheet.getAttribute('data-font');      // before, or undo is a no-op
-    sheet.setAttribute('data-font', value);           // the page changes
+  // What the file says, held across a hover so leaving can put it back. Read
+  // fresh on entry rather than cached at load, because a click — or an edit
+  // arriving from somewhere else — may have moved it since.
+  let committed = null;
+
+  const preview = (name) => sheet.setAttribute('data-font', name);
+
+  list.addEventListener('pointerover', (event) => {
+    const button = event.target.closest('[data-face]');
+    if (!button) return;
+    if (committed === null) committed = chosen();
+    preview(button.dataset.face);
+  });
+
+  list.addEventListener('pointerleave', () => {
+    if (committed === null) return;
+    preview(committed);
+    committed = null;
+  });
+
+  list.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-face]');
+    if (!button) return;
+    const value = button.dataset.face;
+    const was = committed ?? chosen();   // the face before the hover started
+    committed = value;                   // so leaving does not undo the choice
+    sheet.setAttribute('data-font', value);
+    derive();
+
     const id = window.marble?.id(sheet);
-    if (!id) return;                                  // no host: it just forgets
+    if (!id) return;                     // no host: the page still changes, it forgets
     const undo = { type: 'setAttr', id, name: 'data-font', value: was };
     const redo = { type: 'setAttr', id, name: 'data-font', value };
     window.marble.record({ redo: [redo], undo: [undo] });
-    window.marble.op(redo, { immediate: true });      // and is recorded
+    window.marble.op(redo, { immediate: true });
   });
 
-  show();
-  // Re-derive after the page is reconciled against the file, which is exactly
-  // when a control's page-only state has just been lost.
-  window.marble?.register(show) ?? addEventListener('marble:ready', () => window.marble.register(show), { once: true });
+  // Which swatch reads as on is derived, never stored: it is "the button whose
+  // value equals the sheet's attribute", which no selector can ask. The class is
+  // marble-prefixed so the carrier keeps it out of the file and puts it back
+  // after a reconcile.
+  function derive() {
+    const on = committed ?? chosen();
+    list.classList.add('marble-derived');
+    for (const button of list.querySelectorAll('[data-face]')) {
+      button.classList.toggle('marble-on', button.dataset.face === on);
+      button.setAttribute('aria-pressed', String(button.dataset.face === on));
+    }
+  }
+
+  derive();
+  // Re-run after the page is reconciled against the file — exactly when a
+  // derived class has just been replaced by the file's idea of the markup.
+  window.marble
+    ? window.marble.register(derive)
+    : addEventListener('marble:ready', (event) => event.detail.register(derive), { once: true });
 })();
 </script>
 </body>
